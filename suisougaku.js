@@ -63,16 +63,17 @@ const COMP_T={...({})}; // 動的に生成
 const MN={4:'4月',5:'5月',6:'6月',7:'7月',8:'8月',9:'9月',10:'10月',11:'11月',12:'12月',1:'1月',2:'2月',3:'3月'};
 const WEEKS_PER_MONTH=4;
 const PRACTICES=[
-{id:'basic',    icon:'🎵',name:'基礎練習',   desc:'音階・ロングトーン・スケールで土台を固める。曲精度には直接効かない。',         fx:{skill:4,ens:1,song:0, morale:0, stamina:3},cost:0,tag:'basic'},
-{id:'ensemble', icon:'🎶',name:'合奏練習',   desc:'全体合奏。音のブレンドとバランスを磨く。曲精度も少し上がる。',                fx:{skill:1,ens:6,song:2, morale:2, stamina:1},cost:0,tag:'ensemble'},
-{id:'song',     icon:'📜',name:'コンクール曲',desc:'課題曲・自由曲を徹底的に磨く。曲決定後のみ有効。続けると効果が落ちる。',      fx:{skill:0,ens:1,song:8, morale:1, stamina:1},cost:0,tag:'song'},
-{id:'sectional',icon:'🎼',name:'パート練習', desc:'パートごとに細部を磨く。曲精度の底上げに必須。不足するとクオリティ低下。',    fx:{skill:4,ens:0,song:3, morale:1, stamina:2},cost:0,tag:'sectional'},
-{id:'intense',  icon:'⚡',name:'個人特訓',   desc:'苦手箇所の集中克服。技術は上がるが士気が下がりやすい。さぼりが出やすい。',   fx:{skill:8,ens:0,song:0, morale:-4,stamina:3},cost:0,tag:'intense'},
-{id:'teacher',  icon:'🎓',name:'外部講師',   desc:'プロの特別指導（費用要）。コンクール期間は効果1.6倍。',                       fx:{skill:9,ens:7,song:5, morale:5, stamina:2},cost:55000,tag:'teacher',seasonBonus:true},
-{id:'mental',   icon:'💪',name:'メンタル強化',desc:'士気・チームワーク向上。本番のプレッシャーに備える。',                        fx:{skill:0,ens:2,song:0, morale:11,stamina:5},cost:0,tag:'mental'},
-{id:'recording',icon:'🎙',name:'録音・振り返り',desc:'演奏を録音して客観的に分析。合奏と曲精度に効果的。',                        fx:{skill:2,ens:4,song:4, morale:0, stamina:0},cost:0,tag:'recording'},
-{id:'analysis', icon:'🔍',name:'ライバル研究', desc:'他校の演奏を聴いて分析。曲精度と合奏に刺激を与える。',                       fx:{skill:2,ens:3,song:3, morale:2, stamina:0},cost:0,tag:'analysis'},
-{id:'concert',  icon:'🎪',name:'ミニ演奏会',  desc:'地域での演奏。本番慣れと士気向上に。曲精度も少し上がる。',                   fx:{skill:1,ens:4,song:2, morale:8, stamina:2},cost:0,tag:'concert'},
+{id:'basic',    icon:'🎵',name:'基礎練習',   desc:'音階・ロングトーン・スケールで土台を固める。曲精度には直接効かない。',         fx:{skill:2,ens:1,song:0, morale:0, stamina:2},cost:0,tag:'basic'},
+{id:'ensemble', icon:'🎶',name:'合奏練習',   desc:'全体合奏。音のブレンドとバランスを磨く。曲精度も少し上がる。',                fx:{skill:1,ens:3,song:1, morale:1, stamina:1},cost:0,tag:'ensemble'},
+{id:'song',     icon:'📜',name:'コンクール曲',desc:'課題曲・自由曲を徹底的に磨く。曲決定後のみ有効。続けると効果が落ちる。',      fx:{skill:0,ens:1,song:5, morale:1, stamina:1},cost:0,tag:'song'},
+{id:'sectional',   icon:'🎼',name:'パート練習',         desc:'パートごとに細部を磨く。さぼるパートが出ることも。',                         fx:{skill:2,ens:0,song:2, morale:1, stamina:1},cost:0,tag:'sectional'},
+{id:'sectional_sup',icon:'👁',name:'パート練習（顧問巡回）',desc:'顧問が各パートを巡回。技術は上がるが、部員のモチベは下がりやすい。',           fx:{skill:3,ens:0,song:2, morale:-2,stamina:1},cost:0,tag:'sectional'},
+{id:'intense',  icon:'⚡',name:'個人特訓',   desc:'苦手箇所の集中克服。技術は上がるが士気が下がりやすい。さぼりが出やすい。',   fx:{skill:4,ens:0,song:0, morale:-4,stamina:2},cost:0,tag:'intense'},
+{id:'teacher',  icon:'🎓',name:'外部講師',   desc:'プロの特別指導（費用要）。コンクール期間は効果1.6倍。',                       fx:{skill:5,ens:4,song:3, morale:3, stamina:1},cost:55000,tag:'teacher',seasonBonus:true},
+{id:'mental',   icon:'💪',name:'メンタル強化',desc:'士気・チームワーク向上。本番のプレッシャーに備える。',                        fx:{skill:0,ens:1,song:0, morale:6, stamina:3},cost:0,tag:'mental'},
+{id:'recording',icon:'🎙',name:'録音・振り返り',desc:'演奏を録音して客観的に分析。合奏と曲精度に効果的。',                        fx:{skill:1,ens:2,song:2, morale:0, stamina:0},cost:0,tag:'recording'},
+{id:'analysis', icon:'🔍',name:'ライバル研究', desc:'他校の演奏を聴いて分析。曲精度と合奏に刺激を与える。',                       fx:{skill:1,ens:2,song:2, morale:1, stamina:0},cost:0,tag:'analysis'},
+{id:'concert',  icon:'🎪',name:'ミニ演奏会',  desc:'地域での演奏。本番慣れと士気向上に。曲精度も少し上がる。',                   fx:{skill:1,ens:2,song:1, morale:5, stamina:1},cost:0,tag:'concert'},
 ];
 function getPracticeEffective(p){
 const fx={...p.fx};
@@ -94,7 +95,7 @@ const RAND_EVENTS=[
 {icon:'😴',title:'練習に集中できない',   body:'暑さ・疲れで集中力が続かない日があった。',       col:'var(--amber)', fx:g=>{applyAll(g,{morale:-5,stamina:-3})}},
 {icon:'💰',title:'保護者から寄付',        body:'保護者会から部費の補助があった！',              col:'var(--gold)',  fx:g=>{g.funds+=70000}},
 {icon:'🎉',title:'地域イベントに出演',    body:'地域のイベントに出演し、演奏経験を積んだ。',    col:'var(--green)', fx:g=>{applyAll(g,{ens:3,morale:6,song:2})}},
-{icon:'📺',title:'メディア取材',          body:'地元テレビの取材が来た！部員のやる気が急上昇。',col:'var(--rose)',  fx:g=>{applyAll(g,{morale:12})}},
+{icon:'📺',title:'メディア取材',          body:'地元テレビの取材が来た！部員のやる気が急上昇。',col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7})}},
 {icon:'😤',title:'部内で意見対立',        body:'練習方針を巡って部員間で意見がぶつかった。',    col:'var(--red)',   fx:g=>{applyAll(g,{morale:-8})}},
 {icon:'🌸',title:'新しい友情',            body:'部員同士の絆が深まり、チームワークが向上！',    col:'var(--rose)',  fx:g=>{applyAll(g,{ens:4,morale:5})}},
 {icon:'📚',title:'楽典の自習ブーム',      body:'理論を自主学習する部員が増え、表現力が向上。',  col:'var(--blue)',  fx:g=>{applyAll(g,{ens:3,skill:2})}},
@@ -108,25 +109,38 @@ const RAND_EVENTS=[
 {icon:'💸',title:'施設修繕費が発生',      body:'練習室の設備修繕が必要になった。',              col:'var(--red)',   fx:g=>{g.funds-=40000},diff:['easy']},
 {icon:'🔥',title:'レギュラー争いが激化', body:'メンバー間の競争が激しくなり、空気が張り詰めた。',col:'var(--red)',  fx:g=>{applyAll(g,{morale:-6});g.conflictActive=true},diff:['hard']},
 {icon:'🤝',title:'ライバルと和解',        body:'対立していた部員同士が話し合い、絆が深まった。',col:'var(--rose)', fx:g=>{applyAll(g,{morale:8,ens:3});g.conflictActive=false},diff:['hard']},
-{icon:'🏅',title:'OBが特別指導',          body:'全国経験者のOBが直接指導してくれた。',          col:'var(--gold)',  fx:g=>{applyAll(g,{skill:8,ens:5})},diff:['hard']},
+{icon:'🏅',title:'OBが特別指導',          body:'全国経験者のOBが直接指導してくれた。',          col:'var(--gold)',  fx:g=>{applyAll(g,{skill:5,ens:3})},diff:['hard']},
 
 // ── 人間関係・ドラマ ──
 {icon:'💬',title:'部員が悩みを打ち明けた',   body:'ある部員が練習後に顧問に相談。話を聞いてもらえて、気持ちが軽くなったようだ。',         col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7})}},
 {icon:'😭',title:'3年生が引退を意識し始めた', body:'受験を控えた3年生が「最後のコンクール」を意識し、練習への向き合い方が変わった。',      col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:3})}},
 {icon:'❤️',title:'パート内に友情が芽生えた',  body:'練習後に一緒に帰る部員が増えた。パートの雰囲気がぐっと和やかになっている。',            col:'var(--rose)',  fx:g=>{applyAll(g,{ens:6,morale:5})}},
 {icon:'😠',title:'先輩が後輩に厳しく当たった',body:'指導が行き過ぎて後輩が萎縮してしまった。翌日、先輩は謝りに行ったようだ。',              col:'var(--red)',   fx:g=>{applyAll(g,{morale:-6,ens:-3})}},
-{icon:'🤗',title:'部長がみんなを励ました',    body:'落ち込んだ練習の後、部長が全員に声をかけた。その言葉が部員の心に響いた。',              col:'var(--teal)',  fx:g=>{applyAll(g,{morale:9})}},
+{icon:'🤗',title:'部長がみんなを励ました',    body:'落ち込んだ練習の後、部長が全員に声をかけた。その言葉が部員の心に響いた。',              col:'var(--teal)',  fx:g=>{applyAll(g,{morale:5})}},
 {icon:'🙈',title:'こっそり交際発覚',          body:'部内カップルの存在が明るみに。一時ざわついたが、「応援する！」という声が多かった。',    col:'var(--rose)',  fx:g=>{applyAll(g,{morale:4})}},
 {icon:'😶',title:'無口な部員が急に饒舌に',    body:'いつも黙々と練習していた部員が突然語り出した。意外な一面にみんなびっくり。',            col:'var(--teal)',  fx:g=>{applyAll(g,{ens:3,morale:4})}},
 {icon:'🥺',title:'1年生が辞めようとしていた', body:'つらそうにしていた1年生に先輩が声をかけた。翌週、その子は笑顔で来た。',               col:'var(--blue)',  fx:g=>{applyAll(g,{morale:6,ens:4})}},
 {icon:'🔥',title:'パートリーダーが奮起',       body:'スランプ気味だったパートリーダーが「絶対に結果を出す」と宣言。部全体の空気が引き締まった。', col:'var(--gold)', fx:g=>{applyAll(g,{skill:4,morale:6})}},
 {icon:'💤',title:'練習後に部員が居眠り',       body:'部室のソファで部員が爆睡していた。疲れている証拠だが、それだけ頑張っている証でもある。', col:'var(--amber)', fx:g=>{applyAll(g,{stamina:-2,morale:2})}},
+// ── 追加マイナスイベント ──
+{icon:'🤒',title:'風邪が部内で流行',        body:'季節の変わり目に風邪が蔓延。練習どころではない日が続いた。',                    col:'var(--red)',   fx:g=>{applyAll(g,{stamina:-6,morale:-4,skill:-2})}},
+{icon:'😔',title:'スランプ期に突入',         body:'なぜかうまくいかない。音が出ない。そういう時期が来てしまった。',                  col:'var(--red)',   fx:g=>{applyAll(g,{skill:-4,morale:-5})}},
+{icon:'🌡️',title:'猛暑で練習が消耗戦',      body:'冷房が追いつかない練習室で、体力を削りながらの練習が続いた。',                  col:'var(--amber)', fx:g=>{applyAll(g,{stamina:-7,morale:-3})}},
+{icon:'😩',title:'練習のマンネリ感が漂う',   body:'同じことの繰り返しに、部員たちの目から少し光が消えた気がした。',                col:'var(--amber)', fx:g=>{applyAll(g,{morale:-6,ens:-2})}},
+{icon:'📉',title:'合奏がまとまらない',        body:'なぜかバラバラな音が続いた。合わせれば合わせるほど、ズレていく感覚。',          col:'var(--red)',   fx:g=>{applyAll(g,{ens:-5,morale:-3})}},
+{icon:'😤',title:'顧問と部員が衝突',         body:'練習方針を巡って顧問の先生と部員の意見がぶつかった。翌日の空気が重かった。',    col:'var(--red)',   fx:g=>{applyAll(g,{morale:-7,ens:-3})}},
+{icon:'🏃',title:'部員が無断欠席',           body:'連絡なしに休む部員が続いた。残った部員のやる気にも影響が出始めた。',            col:'var(--red)',   fx:g=>{applyAll(g,{morale:-5,skill:-2})}},
+{icon:'💢',title:'パート間で不満が爆発',     body:'ずっと抑えていた不満がついに表に出た。話し合いは夜遅くまで続いた。',            col:'var(--red)',   fx:g=>{applyAll(g,{morale:-8,ens:-5})}},
+{icon:'🎵',title:'曲が難しすぎて停滞',       body:'選んだ曲の難易度が高く、なかなか仕上がらない。焦りが空回りしている。',          col:'var(--amber)', fx:g=>{applyAll(g,{skill:-2,morale:-4,song:-3})}},
+{icon:'😰',title:'本番で大きなミス',         body:'演奏中に目立つミスが出てしまった。帰りのバスは静かだった。',                    col:'var(--red)',   fx:g=>{applyAll(g,{morale:-9,skill:-2})}},
+{icon:'🌧️',title:'長雨で練習場所が使えない', body:'グラウンドも体育館も使えず、練習環境が大幅に制限された一週間だった。',         col:'var(--ink3)',  fx:g=>{applyAll(g,{stamina:-3,skill:-2})}},
+{icon:'😞',title:'コンクール落選のショック', body:'結果発表の瞬間、会場が静まり返った。しばらく誰も話さなかった。',               col:'var(--red)',   fx:g=>{applyAll(g,{morale:-12,skill:2})}},
 
 // ── 大会・コンクール関連 ──
 {icon:'📣',title:'コンクール要項が届いた',     body:'今年のコンクールの詳細が発表された。課題曲を見た部員たちの顔が一瞬引き締まった。',     col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:2})}},
 {icon:'🎯',title:'強豪校の演奏を動画で研究',   body:'ライバル校の去年の演奏をみんなで見た。「負けたくない」という気持ちが高まった。',        col:'var(--teal)',  fx:g=>{applyAll(g,{skill:3,morale:6})}},
 {icon:'😰',title:'コンクール直前に緊張が走る', body:'本番まで2週間を切り、練習室の空気がぴりっとした。いい緊張感が漂っている。',            col:'var(--amber)', fx:g=>{applyAll(g,{skill:3,morale:-3})}},
-{icon:'🥇',title:'地区大会で好成績',           body:'地区大会で予想以上の評価を受けた！自信がついて練習へのモチベーションが急上昇。',        col:'var(--gold)',  fx:g=>{applyAll(g,{morale:15,skill:5})}},
+{icon:'🥇',title:'地区大会で好成績',           body:'地区大会で予想以上の評価を受けた！自信がついて練習へのモチベーションが急上昇。',        col:'var(--gold)',  fx:g=>{applyAll(g,{morale:9,skill:3})}},
 {icon:'😢',title:'大会結果が振るわなかった',   body:'悔しい結果になった。でも帰りのバスで誰かが「来年こそ」とつぶやいた。',                  col:'var(--red)',   fx:g=>{applyAll(g,{morale:-8,skill:3})}},
 {icon:'📝',title:'審査員からの講評が届いた',   body:'大会の審査員コメントが届いた。厳しい指摘もあったが、的確で次への指針になった。',         col:'var(--blue)',  fx:g=>{applyAll(g,{skill:5,ens:3})}},
 {icon:'🎺',title:'招待演奏のオファーが来た',   body:'近隣の学校の文化祭から演奏依頼が届いた。本番経験を積む絶好のチャンス！',               col:'var(--green)', fx:g=>{applyAll(g,{ens:5,morale:7,song:3})}},
@@ -134,10 +148,10 @@ const RAND_EVENTS=[
 
 // ── 第三者からの評価・反響 ──
 {icon:'👏',title:'通りがかりの人に褒められた', body:'練習中に窓の外から「素敵な演奏ですね」と声をかけられた。単純だけど嬉しい。',           col:'var(--green)', fx:g=>{applyAll(g,{morale:8})}},
-{icon:'📰',title:'地元紙に掲載された',         body:'地元新聞に部の活動が紹介された。学校中で話題になり、部員たちは少し照れくさそう。',      col:'var(--gold)',  fx:g=>{applyAll(g,{morale:10})}},
-{icon:'🏫',title:'他クラスから応援メッセージ', body:'コンクール前に他クラスの生徒から寄せ書きが届いた。部員たちの目に力が宿った。',          col:'var(--rose)',  fx:g=>{applyAll(g,{morale:9})}},
+{icon:'📰',title:'地元紙に掲載された',         body:'地元新聞に部の活動が紹介された。学校中で話題になり、部員たちは少し照れくさそう。',      col:'var(--gold)',  fx:g=>{applyAll(g,{morale:6})}},
+{icon:'🏫',title:'他クラスから応援メッセージ', body:'コンクール前に他クラスの生徒から寄せ書きが届いた。部員たちの目に力が宿った。',          col:'var(--rose)',  fx:g=>{applyAll(g,{morale:5})}},
 {icon:'👨‍🏫',title:'他の先生が見学に来た',      body:'音楽以外の先生が練習を見に来て「すごい」と言ってくれた。普段と違う緊張感があった。',   col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:2})}},
-{icon:'🌐',title:'SNSで演奏動画が拡散',        body:'演奏の動画がSNSで話題になった。コメント欄が温かい言葉であふれていた。',               col:'var(--teal)',  fx:g=>{applyAll(g,{morale:12}); g.funds+=10000}},
+{icon:'🌐',title:'SNSで演奏動画が拡散',        body:'演奏の動画がSNSで話題になった。コメント欄が温かい言葉であふれていた。',               col:'var(--teal)',  fx:g=>{applyAll(g,{morale:7}); g.funds+=10000}},
 {icon:'🎓',title:'卒業生から激励メール',        body:'OGからメッセージが届いた。「あの頃を思い出した。頑張ってね」という一言が沁みた。',      col:'var(--gold)',  fx:g=>{applyAll(g,{morale:7,skill:2})}},
 
 // ── 備品・お金系 ──
@@ -162,7 +176,7 @@ const RAND_EVENTS=[
 {icon:'😂',title:'顧問が珍発言',               body:'顧問の先生が突然「音楽はラブレターだ！」と言い出した。部員たちは笑いをこらえるのに必死。', col:'var(--amber)', fx:g=>{applyAll(g,{morale:8})}},
 {icon:'🐈',title:'野良猫が練習室に乱入',       body:'開いていた窓から猫が入ってきた。練習は一時中断したが、場が一気に和んだ。',             col:'var(--amber)', fx:g=>{applyAll(g,{morale:9,stamina:2})}},
 {icon:'🍕',title:'差し入れ大会が始まった',     body:'誰かが練習後にお菓子を持ってきたのをきっかけに、差し入れブームが到来した。',            col:'var(--green)', fx:g=>{applyAll(g,{morale:10,stamina:4})}},
-{icon:'🎤',title:'カラオケ大会で盛り上がった', body:'部活後のカラオケ大会が大盛況。翌日の練習は笑いが絶えなかった。',                        col:'var(--rose)',  fx:g=>{applyAll(g,{morale:11,ens:3})}},
+{icon:'🎤',title:'カラオケ大会で盛り上がった', body:'部活後のカラオケ大会が大盛況。翌日の練習は笑いが絶えなかった。',                        col:'var(--rose)',  fx:g=>{applyAll(g,{morale:6,ens:2})}},
 {icon:'🌀',title:'楽譜が風で飛んだ',           body:'窓を開けたまま練習していたら楽譜が一斉に飛んだ。全員で回収しながら笑いが止まらなかった。', col:'var(--amber)', fx:g=>{applyAll(g,{morale:5})}},
 {icon:'👑',title:'部内でニックネームが定着',   body:'誰かがつけたあだ名がいつの間にか全員に定着。呼ばれるたびにクスクス笑いが起きる。',      col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7,ens:4})}},
 {icon:'🥁',title:'ドラムが突然暴走',           body:'パーカッションが間違えて全力でドラムを叩き出した。一瞬静まり返った後、爆笑が起きた。',   col:'var(--amber)', fx:g=>{applyAll(g,{morale:8})}},
@@ -183,38 +197,146 @@ function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function rndName(){return pick(LAST)+' '+(Math.random()<0.65?pick(FIRST_F):pick(FIRST_M))}
 function applyAll(g,fx){
 g.members.forEach(m=>{
-if(fx.skill)   m.skill     =cap(m.skill     +(fx.skill     +rnd(-2,2)));
-if(fx.ens)     m.expression=cap(m.expression+(fx.ens       +rnd(-2,2)));
-if(fx.morale)  m.morale    =cap(m.morale    +(fx.morale    +rnd(-2,2)));
-if(fx.stamina) m.stamina   =cap(m.stamina   +(fx.stamina   +rnd(-1,1)));
+// 全員に影響するが個人差あり：一部の部員はほぼ影響なし、一部は逆効果も
+const roll=Math.random();
+const affected = roll > 0.15; // 15%の部員はほぼ影響なし
+if(!affected) return;
+const sign = roll < 0.08 ? -1 : 1; // 8%の確率で効果が逆転
+const indiv = 0.5 + Math.random(); // 0.5〜1.5倍の個人差
+if(fx.skill)   m.skill     =cap(m.skill     +Math.round((fx.skill  +rnd(-3,2))*indiv*sign));
+if(fx.ens)     m.expression=cap(m.expression+Math.round((fx.ens    +rnd(-3,2))*indiv*sign));
+if(fx.morale)  m.morale    =cap(m.morale    +Math.round((fx.morale +rnd(-3,2))*indiv));
+if(fx.stamina) m.stamina   =cap(m.stamina   +Math.round((fx.stamina+rnd(-2,1))*indiv));
 });
 }
+// パート練習のさぼり・顧問巡回処理
+function calcPartSaboriRate(part){
+  const members = G.members.filter(m=>m.part===part);
+  if(!members.length) return 0;
+  const leader = members.find(m=>m.isPartLeader||m.isCaptain);
+  // さぼりやすい性格
+  const saboriPersonalities = ['お調子者','自由奔放','おっとり型'];
+  const saboriCount = members.filter(m=>saboriPersonalities.includes(m.personality)).length;
+  const avgMorale = members.reduce((a,m)=>a+m.morale,0)/members.length;
+  // ベース確率：さぼり性格が多い・士気低い・リーダー不在で上昇
+  let rate = 0.05;
+  rate += (saboriCount / members.length) * 0.35;
+  if(avgMorale < 40) rate += 0.20;
+  else if(avgMorale < 55) rate += 0.10;
+  if(!leader) rate += 0.15;
+  // リーダーが完璧主義・努力家・リーダーシップ型なら抑制
+  if(leader){
+    if(['完璧主義者','努力家','リーダーシップ型'].includes(leader.personality)) rate -= 0.20;
+    if(['お調子者','自由奔放'].includes(leader.personality)) rate += 0.10;
+  }
+  return Math.max(0, Math.min(0.85, rate));
+}
 function applyPracticeToMembers(fx){
+// パート練習の場合：パートごとにさぼり判定
+const isSectional    = G._currentPracTag === 'sectional';
+const isSupervised   = G._currentPracTag === 'sectional_sup';
+const saboriParts = {}; // パート名 → さぼったか
+if(isSectional){
+  PARTS.forEach(part=>{
+    const rate = calcPartSaboriRate(part);
+    saboriParts[part] = Math.random() < rate;
+  });
+  // さぼったパートをログに記録
+  const saboriList = Object.entries(saboriParts).filter(([,v])=>v).map(([p])=>p);
+  if(saboriList.length > 0){
+    G._lastSaboriParts = saboriList;
+  } else {
+    G._lastSaboriParts = [];
+  }
+} else {
+  G._lastSaboriParts = [];
+}
 G.members.forEach(m=>{
 const pers=m.personality;
-const effortBonus = pers==='努力家'?1.3 : pers==='天才肌'?(Math.random()<0.4?2.0:0.7) : pers==='完璧主義者'?1.2 : 1.0;
-const moraleBonus = pers==='ムードメーカー'?1.4 : pers==='リーダーシップ型'?1.2 : pers==='お調子者'?1.3 : 1.0;
-const moralePenalty = pers==='完璧主義者'?1.4 : pers==='繊細なアーティスト'?1.3 : 1.0;
-const staminaFactor = m.stamina < 40 ? 0.7 : m.stamina < 60 ? 0.9 : 1.0;
-const moraleFactor = m.morale < 30 ? 0.6 : m.morale < 50 ? 0.85 : 1.0;
+const effortBonus = pers==='努力家'?1.2 : pers==='天才肌'?(Math.random()<0.4?1.8:0.5) : pers==='完璧主義者'?1.1 : 1.0;
+const moraleBonus = pers==='ムードメーカー'?1.2 : pers==='リーダーシップ型'?1.1 : pers==='お調子者'?1.1 : 1.0;
+const moralePenalty = pers==='完璧主義者'?1.3 : pers==='繊細なアーティスト'?1.2 : 1.0;
+const staminaFactor = m.stamina < 30 ? 0.4 : m.stamina < 50 ? 0.7 : m.stamina < 70 ? 0.9 : 1.0;
+const moraleFactor = m.morale < 25 ? 0.4 : m.morale < 45 ? 0.7 : m.morale < 60 ? 0.9 : 1.0;
 const growthFactor = effortBonus * staminaFactor * moraleFactor;
-if(fx.skill)   m.skill     =cap(m.skill     +Math.round((fx.skill  +rnd(-2,3))*growthFactor));
-if(fx.ens)     m.expression=cap(m.expression+Math.round((fx.ens    +rnd(-2,3))*growthFactor));
-if(fx.stamina) m.stamina   =cap(m.stamina   +(fx.stamina+rnd(-1,2)));
-if(fx.morale){
-const mDelta = fx.morale > 0
-? Math.round(fx.morale * moraleBonus + rnd(-1,2))
-: Math.round(fx.morale * moralePenalty + rnd(-1,1));
-m.morale=cap(m.morale+mDelta);
+
+// 成長抵抗：個人のポテンシャルで鈍化ラインが変わる
+// potential: 55〜98で生成。高いほど伸びしろ大
+// 鈍化開始ライン = potential * 0.75 程度（potential:70→約52、potential:90→約67）
+const isTalent = m.personality === '天才肌';
+const isEffort = m.personality === '努力家';
+// 鈍化ラインをポテンシャル・性格から算出
+// 鈍化ライン：potential:60→約66、potential:75→約83、potential:90→約99
+const softFloor = isTalent ? m.potential * 1.02
+                : isEffort ? m.potential * 0.95
+                : m.potential * 0.88;
+function growthResist(val, floor, talent){
+  const d = val - floor; // 鈍化ラインからの距離
+  if(d < 0)  return 1.0;            // 鈍化ライン未満：普通に成長
+  if(d < 5)  return talent ? 0.75 : 0.55;
+  if(d < 10) return talent ? 0.50 : 0.30;
+  if(d < 15) return talent ? 0.25 : 0.12;
+  return      talent ? 0.10 : 0.04; // 大幅超過：ほぼ動かない
 }
-if(fx.skill && m.potential > 80 && Math.random() < 0.15){
-m.skill=cap(m.skill+rnd(1,3)); // ブレイクスルー
+const skillCeil = growthResist(m.skill,      softFloor, isTalent);
+const ensCeil   = growthResist(m.expression, softFloor, isTalent);
+
+// パート練習のさぼり・顧問巡回補正
+const isSect = G._currentPracTag==='sectional' || G._currentPracTag==='sectional_sup';
+const didSabori = isSect && G._lastSaboriParts && G._lastSaboriParts.includes(m.part);
+const supervised = G._currentPracTag==='sectional_sup';
+let sectFactor = 1.0;
+if(didSabori){
+  // さぼったパート：効果激減、個人のスキルも少し落ちる
+  sectFactor = 0.1 + Math.random()*0.15;
+  m.morale = cap(m.morale - rnd(2,5)); // さぼり癖でモチベ微減
+} else if(supervised){
+  // 顧問巡回：技術効果1.3倍、ただしモチベに後でペナルティ
+  sectFactor = 1.3;
+}
+if(fx.skill)   m.skill     =cap(m.skill     +Math.round((fx.skill  +rnd(-3,2))*growthFactor*skillCeil*sectFactor));
+if(fx.ens)     m.expression=cap(m.expression+Math.round((fx.ens    +rnd(-3,2))*growthFactor*ensCeil*sectFactor));
+
+// スタミナは練習するたびに必ず少し消耗する
+const staminaCost = rnd(1,3);
+m.stamina = cap(m.stamina - staminaCost + (fx.stamina ? fx.stamina + rnd(-1,1) : 0));
+
+if(fx.morale){
+let mBase = fx.morale;
+// 顧問巡回時：モチベペナルティ追加（監視されている圧力）
+if(supervised){
+  const pressure = m.personality==='完璧主義者' ? 0 :
+                   m.personality==='人見知り'   ? rnd(3,7) :
+                   m.personality==='自由奔放'   ? rnd(4,8) :
+                   m.personality==='お調子者'   ? rnd(2,5) : rnd(1,4);
+  mBase = mBase - pressure;
+}
+const mDelta = mBase > 0
+? Math.round(mBase * moraleBonus + rnd(-2,2))
+: Math.round(mBase * moralePenalty + rnd(-1,1));
+m.morale=cap(m.morale+mDelta);
+} else {
+if(m.stamina < 35) m.morale = cap(m.morale + rnd(-3,-1));
+// 顧問巡回でmorale指定なしの場合も圧力
+if(supervised){
+  const pressure = m.personality==='完璧主義者'?0:m.personality==='人見知り'?rnd(2,5):rnd(1,3);
+  m.morale = cap(m.morale - pressure);
+}
+}
+
+// ブレイクスルー（確率低下）
+if(fx.skill && m.potential > 80 && Math.random() < 0.08){
+m.skill=cap(m.skill+rnd(1,2));
+}
+// スランプ：スタミナ・士気が低いと技術も落ちることがある
+if(m.stamina < 25 && m.morale < 35 && Math.random() < 0.2){
+m.skill = cap(m.skill - rnd(1,3));
 }
 });
 }
 const DIFF={
 easy:{
-memMin:18,memMax:30,skillBase:12,skillRng:22,funds:180000,moraleBase:62,label:'弱小校',compMod:1.0,
+memMin:18,memMax:30,skillBase:14,skillRng:28,funds:180000,moraleBase:62,label:'弱小校',compMod:1.0,
 duesPerMember:1500,   // 月額部費（円/人）
 monthlyFixed:40000,   // 毎月の固定費（施設・楽器維持等）
 parentReaction:0.7,   // 部費値上げへの保護者反発率（0〜1）
@@ -262,7 +384,7 @@ if(G.songBoredom >= 3) base = Math.round(base * 0.6); // さらに低下
 G.songBoredom = Math.max(0,(G.songBoredom||0)-1);
 }
 G.sectionalDebt = G.sectionalDebt || 0;
-if(pracTag === 'sectional'){
+if(pracTag === 'sectional' || pracTag === 'sectional_sup'){
 G.sectionalDebt = Math.max(0, G.sectionalDebt - 2);
 } else if(pracTag === 'song' || pracTag === 'ensemble'){
 if(sectCount === 0) G.sectionalDebt += 1; // パート練習なしで合奏→クオリティ低下
@@ -338,14 +460,20 @@ while(diff<0){const p=PARTS.find(p=>alloc[p]>1);if(p){alloc[p]--;diff++;}else br
 PARTS.forEach(part=>{
 for(let i=0;i<alloc[part];i++){
 const grade=rnd(1,3);
-const base=cfg.skillBase+rnd(0,cfg.skillRng)+(grade-1)*8;
+// 初期値は低め。学年差は小さく（育成で差がつくイメージ）
+// 1年:ほぼ初心者 / 2年:少し慣れた / 3年:それなりに弾ける
+const gradeOffset = grade===1 ? 0 : grade===2 ? rnd(3,8) : rnd(6,14);
+// 強豪校は初期から幅広く、弱小は低め揃い
+const initCeil = cfg.skillBase < 20 ? 48 : cfg.skillBase < 40 ? 58 : 68;
+const base = Math.min(cfg.skillBase + rnd(0, Math.round(cfg.skillRng*0.55)) + gradeOffset, initCeil);
 const pers=pick(PERSONALITIES);
 const hobby=pick(HOBBIES);
 const str=pick(STRENGTHS_POOL);
 const weak=pick(WEAKNESS_POOL);
-let skill=cap(base), expression=cap(base+rnd(-14,14));
-let stamina=rnd(40,88), morale=cap(cfg.moraleBase+rnd(-14,18));
-let potential=rnd(58,100);
+let skill=cap(base), expression=cap(base+rnd(-8,8));
+let stamina = grade===1 ? rnd(28,65) : grade===2 ? rnd(38,78) : rnd(45,85);
+let morale=cap(cfg.moraleBase+rnd(-14,18));
+let potential=rnd(65,98); // 65〜98：低くても65台まで届く
 if(pers==='努力家'){stamina=Math.min(99,stamina+rnd(8,18));morale=Math.min(99,morale+rnd(5,12));}
 if(pers==='天才肌'){skill=Math.min(99,skill+rnd(10,20));potential=Math.min(100,potential+10);morale=Math.max(20,morale-rnd(5,15));}
 if(pers==='完璧主義者'){skill=Math.min(99,skill+rnd(5,12));morale=Math.max(20,morale-rnd(5,10));stamina=Math.max(20,stamina-rnd(5,10));}
@@ -357,7 +485,9 @@ if(pers==='人見知り'){morale=Math.max(20,morale-rnd(5,15));}
 if(pers==='热血漢'){stamina=Math.min(99,stamina+rnd(5,15));morale=Math.min(99,morale+rnd(5,10));skill=Math.max(10,skill-rnd(2,5));}
 if(Math.random()<0.1) morale=rnd(20,40);   // 士気が低い子
 if(Math.random()<0.08) stamina=rnd(20,35);  // スタミナがない子
-if(Math.random()<0.08) skill=cap(base+rnd(15,25)); // 飛び抜けて上手い子
+// 飛び抜けて上手い子（学年が高いほど出やすいが初期上限は抑える）
+const exceptionalChance = grade===1 ? 0.03 : grade===2 ? 0.06 : 0.10;
+if(Math.random()<exceptionalChance) skill=Math.min(58, base+rnd(8,16));
 members.push({
 id:members.length, name:rndName(), part, grade,
 skill:cap(skill), expression:cap(expression),
@@ -825,7 +955,15 @@ const p=PRACTICES.find(x=>x.id===selPracId);
 if(p.cost&&G.funds<p.cost){notif('資金不足','外部講師を招く資金が不足しています');return;}
 G.funds-=p.cost;
 const effectiveFx=getPracticeEffective(p);
+G._currentPracTag = p.tag||p.id; // パート練習判定用
 applyPracticeToMembers(effectiveFx);
+// さぼりパートをイベントに反映
+if(G._lastSaboriParts && G._lastSaboriParts.length > 0 && !eventData){
+  const sp = G._lastSaboriParts.join('・');
+  eventData={icon:'😴',title:`${sp}パートがさぼった`,
+    body:`${sp}パートが自主練をさぼっていた。そのぶん成長が遅れそうだ。`,
+    col:'var(--amber)'};
+}
 const songGain = calcSongGain(p.tag||p.id, effectiveFx);
 G.song = cap(G.song + songGain);
 const shirker = checkShirkers(p.tag||p.id);
@@ -1007,16 +1145,21 @@ const lowSkill=G.members.filter(m=>m.skill<35);
 // 書き出しバリエーション
 const openings=[];
 if(cap_) openings.push(
-  `${cap_.name}の鋭い一声で、今日も練習が始まった。`,
-  `「もう一回！」${cap_.name}の声が響くたびに、部員たちの動きが引き締まる。`,
-  `${cap_.name}がタクトを握り締め、静かに前を向いた。`,
-  `部長の${cap_.name}が楽譜を広げた瞬間、練習室の空気が変わった。`
+  `${cap_.name}が「集合！」と声をかけ、今日も練習が始まった。`,
+  `「もう一回やろう」${cap_.name}が振り返ると、部員たちが自然と姿勢を正した。`,
+  `${G.advisor}先生がタクトを握り締め、静かに前を向いた。`,
+  `部長の${cap_.name}が部員たちを見渡し、小さく頷いた。`
 );
 openings.push(
   `放課後の練習室に、楽器の音が溢れ出した。`,
   `${G.advisor}先生の「はい、止めて」という声が何度も飛んだ。`,
   `今週も部員たちは音楽室に集まり、音を重ねていった。`,
   `窓の外が暗くなっても、${G.school}吹奏楽部の練習は続いた。`
+);
+openings.push(
+  `${G.advisor}先生の指揮棒が上がった瞬間、部員たちの視線が一点に集まった。`,
+  `「もう一度！」${G.advisor}先生の声が飛ぶたびに、音楽室の空気が引き締まる。`,
+  `${G.advisor}先生がタクトを振り下ろすと、重なった音が一気に広がった。`
 );
 if(mem) openings.push(
   `${mem.name}が楽器を構えたとき、ふと去年のことを思い出した。`,
@@ -1236,6 +1379,30 @@ return Math.round((base+captainBonus+plBonus-countPenalty-conflictPenalty-shirke
 }
 function runComp(name,month){
 G.achievements.firstContest=true;
+// ── コンクール遠征費・参加費 ──
+const compCost = (()=>{
+  const members = G.members.length;
+  // 大会ランクによって遠征費が変わる
+  const isNational = name.includes('全国')||name.includes('東日本');
+  const isPref     = name.includes('県')||name.includes('支部');
+  const isDistrict = name.includes('地区');
+  // 参加費（固定）+ 遠征費（部員数×交通費）
+  const entryFee   = isNational?10000 : isPref?5000 : 2000;
+  const travelPer  = isNational?2500  : isPref?1200  : 400;
+  const hotelPer   = isNational?3500  : isPref?1500  : 0; // 宿泊が必要な大会
+  return entryFee + (travelPer + hotelPer) * members;
+})();
+if(G.funds < compCost){
+  // 資金不足でも出場できるが部員の士気が下がる
+  addLog(`${name}：参加費・遠征費(${compCost.toLocaleString()}円)が不足！資金：${G.funds.toLocaleString()}円`,'資金');
+  G.funds = 0;
+  G.members.forEach(m=>m.morale=cap(m.morale-rnd(3,7)));
+  showEventPopup('💸','遠征費が足りない！',`${name}の参加費・遠征費${compCost.toLocaleString()}円が不足。
+部員たちは肩を落としながら出発した。`,'var(--red)');
+} else {
+  G.funds -= compCost;
+  addLog(`${name}：参加費・遠征費 -${compCost.toLocaleString()}円`,'資金');
+}
 const score=calcScore();
 const tbl=getCompTable();
 const t=tbl[name];
@@ -1539,19 +1706,50 @@ showEventPopup('📋','定期演奏会の準備開始',
 '年末の定期演奏会に向けて選曲・パート割り当てが始まった。','var(--blue)');
 }
 function monthEvent11(){
-const success=G.morale>60&&G.skill>50;
-if(success){
-applyAll(G,{morale:10,ens:5,skill:3});
-showEventPopup('🎭','定期演奏会大成功！',
-'会場いっぱいの観客の前で演奏し、スタンディングオベーション！部員の自信が満ちた。','var(--gold)');
-G.funds+=50000; // チケット収益
-addLog('定期演奏会大成功！士気・資金ともに向上。','イベント');
+// ── 定期演奏会の収支計算 ──
+// 支出：会場費 + 印刷費(プログラム) + 照明・音響費
+const venueCost   = G.diff==='easy' ? 40000  : G.diff==='mid' ? 70000  : 110000;
+const printCost   = Math.round(G.members.length * 500);
+const stageCost   = G.diff==='easy' ? 15000  : G.diff==='mid' ? 25000  : 40000;
+const totalCost   = venueCost + printCost + stageCost;
+// 収入：チケット収益（演奏力・士気・部員数で集客が変わる）
+const baseAudience = G.diff==='easy' ? 80 : G.diff==='mid' ? 150 : 250;
+const skillBonus   = Math.round((G.skill - 40) * 1.2);  // 演奏力が高いほど集客↑
+const moraleBonus  = Math.round((G.morale - 50) * 0.8); // 士気も影響
+const memberBonus  = Math.round(G.members.length * 0.5);// 部員の家族・友人
+const audience     = Math.max(20, baseAudience + skillBonus + moraleBonus + memberBonus + rnd(-20,30));
+const ticketPrice  = G.diff==='easy' ? 600 : G.diff==='mid' ? 800 : 1200;
+const ticketIncome = audience * ticketPrice;
+const netBalance   = ticketIncome - totalCost;
+G.funds += netBalance;
+if(G.funds < 0) G.funds = 0;
+// 演奏評価
+const success = G.morale > 60 && G.skill > 50;
+const packed  = audience > baseAudience * 1.3;
+if(success && packed){
+  applyAll(G,{morale:12,ens:6,skill:3});
+  showEventPopup('🎭','定期演奏会大成功！',
+    `満員${audience}人の観客の前でスタンディングオベーション！
+収支：${netBalance>=0?'+':''}${netBalance.toLocaleString()}円（入場${ticketIncome.toLocaleString()}円 / 経費${totalCost.toLocaleString()}円）`,'var(--gold)');
+  addLog(`定期演奏会大成功！観客${audience}人 収支${netBalance>=0?'+':''}${netBalance.toLocaleString()}円`,'資金');
+} else if(success){
+  applyAll(G,{morale:7,ens:4,skill:2});
+  showEventPopup('🎭','定期演奏会 好評',
+    `${audience}人が来場。温かい拍手をもらえた。
+収支：${netBalance>=0?'+':''}${netBalance.toLocaleString()}円（入場${ticketIncome.toLocaleString()}円 / 経費${totalCost.toLocaleString()}円）`,'var(--teal)');
+  addLog(`定期演奏会好評。観客${audience}人 収支${netBalance>=0?'+':''}${netBalance.toLocaleString()}円`,'資金');
 } else {
-applyAll(G,{morale:4,ens:2});
-showEventPopup('🎭','定期演奏会',
-'定期演奏会を無事に終えた。いくつか課題は残ったが、観客からは温かい拍手をもらった。','var(--teal)');
-G.funds+=20000;
-addLog('定期演奏会終了。次への課題が見えた。','イベント');
+  applyAll(G,{morale:2,ens:2});
+  showEventPopup('🎭','定期演奏会',
+    `${audience}人が来場。課題の残る演奏になった。
+収支：${netBalance>=0?'+':''}${netBalance.toLocaleString()}円（入場${ticketIncome.toLocaleString()}円 / 経費${totalCost.toLocaleString()}円）`,netBalance<0?'var(--red)':'var(--ink3)');
+  addLog(`定期演奏会終了。観客${audience}人 収支${netBalance>=0?'+':''}${netBalance.toLocaleString()}円`,'資金');
+  if(netBalance < 0) addLog('定期演奏会が赤字になりました。来年は早めにチケット販売を！','資金');
+}
+// 資金不足で公演ができないケース
+if(G.funds <= 0){
+  G.members.forEach(m=>m.morale=cap(m.morale-rnd(3,6)));
+  addLog('資金が底をつきました。部費の見直しを検討してください。','資金');
 }
 }
 function monthEvent12(){
