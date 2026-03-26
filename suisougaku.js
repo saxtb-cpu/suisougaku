@@ -109,6 +109,64 @@ const RAND_EVENTS=[
 {icon:'🔥',title:'レギュラー争いが激化', body:'メンバー間の競争が激しくなり、空気が張り詰めた。',col:'var(--red)',  fx:g=>{applyAll(g,{morale:-6});g.conflictActive=true},diff:['hard']},
 {icon:'🤝',title:'ライバルと和解',        body:'対立していた部員同士が話し合い、絆が深まった。',col:'var(--rose)', fx:g=>{applyAll(g,{morale:8,ens:3});g.conflictActive=false},diff:['hard']},
 {icon:'🏅',title:'OBが特別指導',          body:'全国経験者のOBが直接指導してくれた。',          col:'var(--gold)',  fx:g=>{applyAll(g,{skill:8,ens:5})},diff:['hard']},
+
+// ── 人間関係・ドラマ ──
+{icon:'💬',title:'部員が悩みを打ち明けた',   body:'ある部員が練習後に顧問に相談。話を聞いてもらえて、気持ちが軽くなったようだ。',         col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7})}},
+{icon:'😭',title:'3年生が引退を意識し始めた', body:'受験を控えた3年生が「最後のコンクール」を意識し、練習への向き合い方が変わった。',      col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:3})}},
+{icon:'❤️',title:'パート内に友情が芽生えた',  body:'練習後に一緒に帰る部員が増えた。パートの雰囲気がぐっと和やかになっている。',            col:'var(--rose)',  fx:g=>{applyAll(g,{ens:6,morale:5})}},
+{icon:'😠',title:'先輩が後輩に厳しく当たった',body:'指導が行き過ぎて後輩が萎縮してしまった。翌日、先輩は謝りに行ったようだ。',              col:'var(--red)',   fx:g=>{applyAll(g,{morale:-6,ens:-3})}},
+{icon:'🤗',title:'部長がみんなを励ました',    body:'落ち込んだ練習の後、部長が全員に声をかけた。その言葉が部員の心に響いた。',              col:'var(--teal)',  fx:g=>{applyAll(g,{morale:9})}},
+{icon:'🙈',title:'こっそり交際発覚',          body:'部内カップルの存在が明るみに。一時ざわついたが、「応援する！」という声が多かった。',    col:'var(--rose)',  fx:g=>{applyAll(g,{morale:4})}},
+{icon:'😶',title:'無口な部員が急に饒舌に',    body:'いつも黙々と練習していた部員が突然語り出した。意外な一面にみんなびっくり。',            col:'var(--teal)',  fx:g=>{applyAll(g,{ens:3,morale:4})}},
+{icon:'🥺',title:'1年生が辞めようとしていた', body:'つらそうにしていた1年生に先輩が声をかけた。翌週、その子は笑顔で来た。',               col:'var(--blue)',  fx:g=>{applyAll(g,{morale:6,ens:4})}},
+{icon:'🔥',title:'パートリーダーが奮起',       body:'スランプ気味だったパートリーダーが「絶対に結果を出す」と宣言。部全体の空気が引き締まった。', col:'var(--gold)', fx:g=>{applyAll(g,{skill:4,morale:6})}},
+{icon:'💤',title:'練習後に部員が居眠り',       body:'部室のソファで部員が爆睡していた。疲れている証拠だが、それだけ頑張っている証でもある。', col:'var(--amber)', fx:g=>{applyAll(g,{stamina:-2,morale:2})}},
+
+// ── 大会・コンクール関連 ──
+{icon:'📣',title:'コンクール要項が届いた',     body:'今年のコンクールの詳細が発表された。課題曲を見た部員たちの顔が一瞬引き締まった。',     col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:2})}},
+{icon:'🎯',title:'強豪校の演奏を動画で研究',   body:'ライバル校の去年の演奏をみんなで見た。「負けたくない」という気持ちが高まった。',        col:'var(--teal)',  fx:g=>{applyAll(g,{skill:3,morale:6})}},
+{icon:'😰',title:'コンクール直前に緊張が走る', body:'本番まで2週間を切り、練習室の空気がぴりっとした。いい緊張感が漂っている。',            col:'var(--amber)', fx:g=>{applyAll(g,{skill:3,morale:-3})}},
+{icon:'🥇',title:'地区大会で好成績',           body:'地区大会で予想以上の評価を受けた！自信がついて練習へのモチベーションが急上昇。',        col:'var(--gold)',  fx:g=>{applyAll(g,{morale:15,skill:5})}},
+{icon:'😢',title:'大会結果が振るわなかった',   body:'悔しい結果になった。でも帰りのバスで誰かが「来年こそ」とつぶやいた。',                  col:'var(--red)',   fx:g=>{applyAll(g,{morale:-8,skill:3})}},
+{icon:'📝',title:'審査員からの講評が届いた',   body:'大会の審査員コメントが届いた。厳しい指摘もあったが、的確で次への指針になった。',         col:'var(--blue)',  fx:g=>{applyAll(g,{skill:5,ens:3})}},
+{icon:'🎺',title:'招待演奏のオファーが来た',   body:'近隣の学校の文化祭から演奏依頼が届いた。本番経験を積む絶好のチャンス！',               col:'var(--green)', fx:g=>{applyAll(g,{ens:5,morale:7,song:3})}},
+{icon:'🏟️',title:'大きなホールで練習できた',  body:'市民ホールを借りて練習できた。本番さながらの音響に部員たちの目が輝いた。',             col:'var(--teal)',  fx:g=>{applyAll(g,{ens:6,song:4,morale:8})}},
+
+// ── 第三者からの評価・反響 ──
+{icon:'👏',title:'通りがかりの人に褒められた', body:'練習中に窓の外から「素敵な演奏ですね」と声をかけられた。単純だけど嬉しい。',           col:'var(--green)', fx:g=>{applyAll(g,{morale:8})}},
+{icon:'📰',title:'地元紙に掲載された',         body:'地元新聞に部の活動が紹介された。学校中で話題になり、部員たちは少し照れくさそう。',      col:'var(--gold)',  fx:g=>{applyAll(g,{morale:10})}},
+{icon:'🏫',title:'他クラスから応援メッセージ', body:'コンクール前に他クラスの生徒から寄せ書きが届いた。部員たちの目に力が宿った。',          col:'var(--rose)',  fx:g=>{applyAll(g,{morale:9})}},
+{icon:'👨‍🏫',title:'他の先生が見学に来た',      body:'音楽以外の先生が練習を見に来て「すごい」と言ってくれた。普段と違う緊張感があった。',   col:'var(--blue)',  fx:g=>{applyAll(g,{morale:5,skill:2})}},
+{icon:'🌐',title:'SNSで演奏動画が拡散',        body:'演奏の動画がSNSで話題になった。コメント欄が温かい言葉であふれていた。',               col:'var(--teal)',  fx:g=>{applyAll(g,{morale:12}); g.funds+=10000}},
+{icon:'🎓',title:'卒業生から激励メール',        body:'OGからメッセージが届いた。「あの頃を思い出した。頑張ってね」という一言が沁みた。',      col:'var(--gold)',  fx:g=>{applyAll(g,{morale:7,skill:2})}},
+
+// ── 備品・お金系 ──
+{icon:'🎻',title:'楽器を新調した',             body:'長年使っていた楽器を新しくした。音の響きが格段によくなった気がする。',                col:'var(--green)', fx:g=>{applyAll(g,{skill:4}); g.funds-=80000}},
+{icon:'🎼',title:'楽譜を大量購入',             body:'新しいアンサンブル曲の楽譜を揃えた。練習の幅が広がりそうだ。',                          col:'var(--blue)',  fx:g=>{applyAll(g,{ens:3}); g.funds-=20000}},
+{icon:'🏦',title:'学校から緊急補助金',         body:'学校の予算から特別補助が下りた。備品購入の悩みが一気に解決した。',                      col:'var(--gold)',  fx:g=>{g.funds+=60000}},
+{icon:'🎪',title:'バザーで資金調達',           body:'部員たちが手作りグッズを販売した。思ったより売れて、みんな大喜び。',                    col:'var(--green)', fx:g=>{g.funds+=35000; applyAll(g,{morale:5})}},
+{icon:'🔧',title:'楽器修理が重なった',         body:'複数の楽器が同時に不具合を起こし、修理費がかさんだ。',                                  col:'var(--red)',   fx:g=>{g.funds-=50000}},
+{icon:'📦',title:'備品の寄付が届いた',         body:'地域の方から使わなくなった楽器や備品が寄贈された。部員たちが丁寧にお礼状を書いた。',    col:'var(--teal)',  fx:g=>{g.funds+=40000; applyAll(g,{morale:4})}},
+{icon:'💴',title:'チケット販売が好調',         body:'定期演奏会のチケットが予想を上回るペースで売れている。本番へのプレッシャーも増した。',   col:'var(--gold)',  fx:g=>{g.funds+=45000; applyAll(g,{morale:6})}},
+
+// ── 生徒の成長・進化 ──
+{icon:'⭐',title:'突然の才能開花',             body:'目立たなかった部員が、ある日突然素晴らしいソロを披露した。練習室に拍手が起きた。',      col:'var(--gold)',  fx:g=>{applyAll(g,{skill:5,morale:8})}},
+{icon:'📈',title:'1年生が急成長',             body:'入部当初は不安だった1年生が、みるみるうちに上達してきた。先輩たちが目を丸くしている。', col:'var(--green)', fx:g=>{applyAll(g,{skill:4,ens:3,morale:5})}},
+{icon:'🎵',title:'自主練ブームが到来',         body:'放課後に自主練する部員が急増した。誰かが始めたことが、気づけば全体に広がっていた。',     col:'var(--teal)',  fx:g=>{applyAll(g,{skill:6,stamina:3})}},
+{icon:'🧠',title:'理論を理解した部員が増えた', body:'和声や音楽理論を自分で勉強する部員が出てきた。演奏に深みが増してきている。',             col:'var(--blue)',  fx:g=>{applyAll(g,{skill:4,ens:4})}},
+{icon:'🌱',title:'苦手克服宣言',               body:'苦手なフレーズを「絶対できるようにする」と宣言した部員がいた。その姿勢が周りに伝染した。', col:'var(--green)', fx:g=>{applyAll(g,{skill:5,morale:4})}},
+{icon:'🎤',title:'部員がソロに挑戦',           body:'普段は目立たない部員がソロを志願した。勇気ある一歩に、みんなが温かい目を向けた。',      col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7,song:3})}},
+{icon:'🤝',title:'パート間の交流練習',         body:'普段は別々のパートが合同で練習した。お互いの音を聴き合い、アンサンブルが深まった。',    col:'var(--teal)',  fx:g=>{applyAll(g,{ens:7,morale:5})}},
+
+// ── 笑える・明るい系 ──
+{icon:'😂',title:'顧問が珍発言',               body:'顧問の先生が突然「音楽はラブレターだ！」と言い出した。部員たちは笑いをこらえるのに必死。', col:'var(--amber)', fx:g=>{applyAll(g,{morale:8})}},
+{icon:'🐈',title:'野良猫が練習室に乱入',       body:'開いていた窓から猫が入ってきた。練習は一時中断したが、場が一気に和んだ。',             col:'var(--amber)', fx:g=>{applyAll(g,{morale:9,stamina:2})}},
+{icon:'🍕',title:'差し入れ大会が始まった',     body:'誰かが練習後にお菓子を持ってきたのをきっかけに、差し入れブームが到来した。',            col:'var(--green)', fx:g=>{applyAll(g,{morale:10,stamina:4})}},
+{icon:'🎤',title:'カラオケ大会で盛り上がった', body:'部活後のカラオケ大会が大盛況。翌日の練習は笑いが絶えなかった。',                        col:'var(--rose)',  fx:g=>{applyAll(g,{morale:11,ens:3})}},
+{icon:'🌀',title:'楽譜が風で飛んだ',           body:'窓を開けたまま練習していたら楽譜が一斉に飛んだ。全員で回収しながら笑いが止まらなかった。', col:'var(--amber)', fx:g=>{applyAll(g,{morale:5})}},
+{icon:'👑',title:'部内でニックネームが定着',   body:'誰かがつけたあだ名がいつの間にか全員に定着。呼ばれるたびにクスクス笑いが起きる。',      col:'var(--rose)',  fx:g=>{applyAll(g,{morale:7,ens:4})}},
+{icon:'🥁',title:'ドラムが突然暴走',           body:'パーカッションが間違えて全力でドラムを叩き出した。一瞬静まり返った後、爆笑が起きた。',   col:'var(--amber)', fx:g=>{applyAll(g,{morale:8})}},
+{icon:'🌈',title:'虹が見えてテンションUP',     body:'練習の休憩中に綺麗な虹が出た。「これは吉兆だ！」と盛り上がり、午後の練習が冴えた。',   col:'var(--teal)',  fx:g=>{applyAll(g,{morale:8,stamina:3})}},
 ];
 function pickWeightedEvent(){
 const pool=RAND_EVENTS.filter(e=>!e.diff||e.diff.includes(G.diff));
