@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吹奏楽部シミュレーション</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:       #f5f3ee;
+--bg2:      #fffef9;
+--bg3:      #f0ede6;
+--bg4:      #e8e4db;
+--card:     #fffef9;
+--border:   rgba(120,100,70,0.13);
+--border2:  rgba(120,100,70,0.25);
+--shadow:   0 1px 4px rgba(80,60,30,0.08),0 2px 12px rgba(80,60,30,0.05);
+--shadow2:  0 4px 24px rgba(80,60,30,0.12);
+--ink:      #2c2416;
+--ink2:     #6b5f4e;
+--ink3:     #a8987c;
+--ink4:     #c8bca8;
+--gold:     #b07d2a;
+--gold2:    #e8a820;
+--gold3:    #fff4d6;
+--red:      #c04040;
+--red2:     #fff0f0;
+--green:    #3a7a50;
+--green2:   #edf7f1;
+--blue:     #2a5fa8;
+--blue2:    #eef4ff;
+--teal:     #1a8070;
+--teal2:    #e8f7f5;
+--rose:     #a04060;
+--rose2:    #fdf0f4;
+--amber:    #a06020;
+--amber2:   #fff8ee;
+--serif:    'Shippori Mincho B1', serif;
+--sans:     'BIZ UDPGothic', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;line-height:1.55}
+.view{display:none;position:fixed;inset:0;z-index:10;overflow:hidden}
+.view.active{display:flex}
+#v-start{flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 0;overflow-y:auto;background:var(--bg);background-image:radial-gradient(ellipse at 20% 50%,rgba(176,125,42,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(26,128,112,0.05) 0%,transparent 50%)}
+.start-deco{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.start-deco::before{content:'♩♪♫♬';position:absolute;top:8%;left:5%;font-size:80px;color:rgba(176,125,42,0.05);letter-spacing:24px;font-family:var(--serif)}
+.start-deco::after{content:'♩♪♫♬';position:absolute;bottom:10%;right:4%;font-size:60px;color:rgba(26,128,112,0.05);letter-spacing:18px;transform:rotate(-8deg);font-family:var(--serif)}
+.start-logo{text-align:center;margin-bottom:36px;animation:fadeUp .7s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.start-logo-jp{font-family:var(--serif);font-size:38px;font-weight:800;color:var(--ink);letter-spacing:.12em}
+.start-logo-sub{font-size:11px;color:var(--ink3);letter-spacing:.3em;margin-top:5px;text-transform:uppercase}
+.start-logo-accent{display:inline-block;width:40px;height:2px;background:var(--gold);margin:10px auto 0;border-radius:2px}
+.start-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 36px;width:560px;max-width:95vw;animation:fadeUp .7s .12s ease both;box-shadow:var(--shadow2)}
+.start-sec-title{font-family:var(--serif);font-size:13px;color:var(--gold);margin-bottom:12px;letter-spacing:.08em;border-left:3px solid var(--gold);padding-left:8px}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px}
+.diff-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px 8px;cursor:pointer;text-align:center;transition:all .18s;font-family:var(--sans);color:var(--ink2)}
+.diff-btn:hover{border-color:var(--border2);background:var(--bg2);box-shadow:var(--shadow)}
+.diff-btn.sel{border-color:var(--gold);background:var(--gold3);color:var(--ink)}
+.diff-name{font-size:14px;font-weight:700;font-family:var(--serif);margin-bottom:3px}
+.diff-star{font-size:12px;margin-bottom:4px}
+.diff-desc{font-size:10px;color:var(--ink3);line-height:1.5}
+.school-prev{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:12px 0;position:relative;min-height:58px}
+.sp-name{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.sp-meta{font-size:11px;color:var(--ink2);display:flex;gap:14px;flex-wrap:wrap}
+.sp-tag{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:10px;color:var(--ink3)}
+.reroll{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--ink2);transition:all .14s}
+.reroll:hover{border-color:var(--border2);color:var(--ink)}
+.start-go{width:100%;padding:13px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--serif);font-size:17px;font-weight:700;cursor:pointer;letter-spacing:.18em;transition:all .18s;margin-top:6px;box-shadow:0 2px 8px rgba(176,125,42,0.3)}
+.start-go:hover{background:#c28a2a;box-shadow:0 4px 16px rgba(176,125,42,0.4);transform:translateY(-1px)}
+#v-intro{flex-direction:column;align-items:center;justify-content:flex-start;background:var(--bg);overflow-y:auto;padding:0}
+.intro-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 32px;width:780px;max-width:95vw;max-height:86vh;overflow-y:auto;box-shadow:var(--shadow2)}
+.intro-head{font-family:var(--serif);font-size:22px;font-weight:800;color:var(--ink);margin-bottom:3px}
+.intro-sub{font-size:12px;color:var(--ink2);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.member-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:8px;margin-bottom:20px}
+.mc{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;animation:popIn .3s ease both;cursor:pointer;transition:all .15s}
+.mc:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+@keyframes popIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.mc-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.mc-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.mc-part{font-size:9px;padding:1px 7px;border-radius:8px;font-weight:700}
+.mc-grade{font-size:9px;padding:1px 6px;border-radius:6px}
+.mc-bar-row{display:flex;align-items:center;gap:5px;margin-bottom:2px;font-size:10px;color:var(--ink3)}
+.mc-bar-row span:first-child{width:40px}
+.mc-bar-bg{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.mc-bar-fill{height:100%;border-radius:2px}
+#v-game{flex-direction:column;background:var(--bg)}
+.gh{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);padding:0 18px;height:48px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(80,60,30,0.07);z-index:20}
+.gh-school{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink)}
+.gh-info{display:flex;gap:14px;font-size:11px;color:var(--ink2)}
+.gh-info strong{color:var(--ink);font-weight:700}
+.gh-rep{font-family:var(--serif);font-size:20px;font-weight:800;width:28px;text-align:center}
+.gh-week{background:var(--gold3);border:1px solid rgba(176,125,42,0.3);border-radius:5px;padding:2px 10px;font-size:11px;color:var(--gold);font-weight:700}
+.game-body{flex:1;display:grid;grid-template-columns:186px 1fr 214px;overflow:hidden}
+.gnav{background:var(--card);border-right:1px solid var(--border);padding:12px 0;overflow-y:auto;display:flex;flex-direction:column}
+.gnav-lbl{font-size:9px;letter-spacing:.14em;color:var(--ink4);padding:10px 15px 3px;text-transform:uppercase;font-weight:700}
+.gnav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 15px;background:none;border:none;border-left:2px solid transparent;color:var(--ink2);font-family:var(--sans);font-size:12px;cursor:pointer;transition:all .12s;text-align:left}
+.gnav-btn:hover{background:var(--bg3);color:var(--ink)}
+.gnav-btn.act{background:var(--gold3);color:var(--gold);border-left-color:var(--gold);font-weight:700}
+.gnav-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.gnav-sp{flex:1}
+.gcontent{overflow-y:auto;padding:18px 20px;background:var(--bg)}
+.screen{display:none}.screen.active{display:block}
+.scr-h{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.scr-h::after{content:'';flex:1;height:1px;background:var(--border);margin-left:6px}
+.gright{background:var(--card);border-left:1px solid var(--border);padding:13px;overflow-y:auto;font-size:11px}
+.rp-sec{margin-bottom:16px}
+.rp-lbl{font-size:9px;letter-spacing:.13em;color:var(--ink4);text-transform:uppercase;margin-bottom:7px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.card-h{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;box-shadow:var(--shadow)}
+.stat-lbl{font-size:10px;color:var(--ink3);margin-bottom:3px;letter-spacing:.03em}
+.stat-val{font-family:var(--serif);font-size:22px;font-weight:800}
+.stat-sub{font-size:10px;color:var(--ink4)}
+.skb{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.skb-name{font-size:11px;color:var(--ink2);width:72px;flex-shrink:0}
+.skb-bg{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.skb-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.skb-val{font-size:11px;color:var(--ink);width:22px;text-align:right;font-weight:700}
+.mtbl{width:100%;border-collapse:collapse}
+.mtbl th{text-align:left;padding:6px 8px;color:var(--ink3);font-size:10px;border-bottom:1.5px solid var(--border);font-weight:700;letter-spacing:.06em;white-space:nowrap}
+.mtbl td{padding:6px 8px;border-bottom:1px solid var(--bg4);font-size:12px;vertical-align:middle}
+.mtbl tr:hover td{background:var(--bg3)}
+.mtbl tr.captain td{background:var(--gold3)}
+.g-badge{font-size:9px;padding:1px 6px;border-radius:6px;font-weight:700;white-space:nowrap}
+.g1{background:var(--teal2);color:var(--teal)}
+.g2{background:var(--blue2);color:var(--blue)}
+.g3{background:var(--amber2);color:var(--amber)}
+.minibar{display:flex;align-items:center;gap:4px}
+.minibar-bg{width:44px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.minibar-fill{height:100%;border-radius:2px}
+.ptag{font-size:9px;padding:1px 7px;border-radius:8px;font-weight:700;white-space:nowrap}
+.sch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.sch-m{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;cursor:pointer;transition:all .13s;box-shadow:var(--shadow)}
+.sch-m:hover{border-color:var(--border2);box-shadow:var(--shadow2)}
+.sch-m.cur{border-color:var(--gold);background:var(--gold3)}
+.sch-m.past{opacity:.5}
+.sch-num{font-family:var(--serif);font-size:17px;font-weight:800;color:var(--blue)}
+.sch-lbl{font-size:9px;color:var(--ink3);margin-bottom:3px}
+.sch-ev{font-size:10px;color:var(--ink2);line-height:1.5}
+.ev-dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.week-card{background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .14s;text-align:center;font-family:var(--sans)}
+.week-card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.week-card.sel{border-color:var(--blue);background:var(--blue2)}
+.week-card.locked{opacity:.4;cursor:not-allowed;background:var(--bg3)}
+.wk-num{font-size:10px;color:var(--ink3);margin-bottom:3px}
+.wk-icon{font-size:20px;margin-bottom:4px}
+.wk-name{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.wk-fx{font-size:9px;color:var(--teal);line-height:1.4}
+.wk-cost{font-size:9px;color:var(--red)}
+.week-card.bonus-card{border-color:rgba(176,125,42,.5);background:var(--gold3)}
+.week-card.bonus-card.sel{border-color:var(--gold);background:#fff0c0}
+.comp-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)}
+.res-gold{background:#fff8e6;color:#8a6010;border:1px solid #e8c840;font-weight:700;font-size:11px;padding:3px 12px;border-radius:10px}
+.res-silver{background:#f0f0f0;color:#606880;border:1px solid #b0b8cc;font-weight:700;font-size:11px;padding:3px 12px;border-radius:10px}
+.res-bronze{background:#fff0e8;color:#806040;border:1px solid #c89060;font-weight:700;font-size:11px;padding:3px 12px;border-radius:10px}
+.res-none{background:var(--bg3);color:var(--ink3);border:1px solid var(--border);font-size:11px;padding:3px 12px;border-radius:10px}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);font-family:var(--sans);font-size:12px;cursor:pointer;transition:all .13s;color:var(--ink);background:var(--bg2)}
+.btn:hover{background:var(--bg3);border-color:var(--border)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover{background:#1f4f98}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(176,125,42,0.25)}
+.btn-gold:hover{background:#c28a2a}
+.btn-green{background:var(--green);border-color:var(--green);color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+.log-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg4);font-size:11px;color:var(--ink2)}
+.log-date{color:var(--ink3);flex-shrink:0;width:58px}
+.log-tag{flex-shrink:0;font-weight:700;font-size:10px}
+.log-comp{color:var(--gold)}.log-ev{color:var(--rose)}.log-prac{color:var(--teal)}.log-sys{color:var(--ink3)}.log-recr{color:var(--green)}.log-funds{color:var(--amber)}.log-conflict{color:var(--red)}
+.ach-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg4)}
+.ach-icon{font-size:18px;width:26px;text-align:center}
+.ach-done{color:var(--gold);font-weight:700}
+.ach-todo{color:var(--ink4)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(40,30,15,.45);z-index:300;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 30px;max-width:520px;width:92%;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow2)}
+.modal-title{font-family:var(--serif);font-size:18px;font-weight:800;color:var(--ink);margin-bottom:14px}
+.prof-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:var(--serif);flex-shrink:0;border:2px solid}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.prof-stat{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.prof-stat-lbl{font-size:10px;color:var(--ink3);margin-bottom:2px}
+.prof-stat-val{font-size:16px;font-weight:700;font-family:var(--serif)}
+.ev-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);opacity:0;background:var(--card);border-radius:16px;padding:28px 32px;max-width:400px;width:90%;box-shadow:var(--shadow2);z-index:500;border:1px solid var(--border);text-align:center;pointer-events:none;transition:all .25s}
+.ev-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
+.ev-popup-overlay{display:none;position:fixed;inset:0;background:rgba(40,30,15,.4);z-index:499}
+.ev-popup-overlay.show{display:block}
+.recruit-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rc-info{flex:1}
+.rc-name{font-size:13px;font-weight:700}
+.rc-meta{font-size:10px;color:var(--ink2)}
+#notif{position:fixed;top:auto;bottom:72px;right:16px;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;font-size:12px;z-index:600;transform:translateX(130%);transition:transform .3s ease;max-width:260px;box-shadow:var(--shadow2)}
+#notif.show{transform:translateX(0)}
+#notif-title{font-weight:700;margin-bottom:2px}
+#notif-body{color:var(--ink2);font-size:11px}
+.crown{color:var(--gold);font-size:11px;margin-right:2px}
+.week-result-overlay{display:none;position:fixed;inset:0;background:rgba(30,20,10,.55);z-index:400;align-items:center;justify-content:center}
+.week-result-overlay.show{display:flex}
+.week-result-box{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:0;width:520px;max-width:95vw;max-height:88vh;overflow:hidden;box-shadow:0 8px 40px rgba(80,60,20,0.22);display:flex;flex-direction:column}
+.wr-header{padding:18px 24px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.wr-week-badge{font-size:10px;letter-spacing:.14em;color:var(--ink4);text-transform:uppercase;margin-bottom:4px}
+.wr-title{font-family:var(--serif);font-size:18px;font-weight:800;color:var(--ink)}
+.wr-prac-label{display:inline-block;background:var(--blue2);color:var(--blue);font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px;margin-top:5px}
+.wr-body{overflow-y:auto;padding:18px 24px;flex:1}
+.wr-story-wrap{margin-bottom:16px;position:relative}
+.wr-story-loading{display:flex;align-items:center;gap:10px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--ink3);font-size:13px}
+.wr-story-dots{display:flex;gap:4px}
+.wr-story-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:dotPulse 1.2s ease-in-out infinite}
+.wr-story-dot:nth-child(2){animation-delay:.2s}
+.wr-story-dot:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.wr-story-text{background:var(--bg);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:14px 16px;font-family:var(--serif);font-size:13.5px;line-height:2;color:var(--ink);white-space:pre-wrap;border:1px solid var(--border);border-left:3px solid var(--gold)}
+.wr-story-char{display:inline-block;animation:fadeChar .04s ease both}
+@keyframes fadeChar{from{opacity:0}to{opacity:1}}
+.wr-event-badge{display:flex;align-items:flex-start;gap:10px;background:var(--gold3);border:1px solid rgba(176,125,42,.3);border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:12px}
+.wr-event-icon{font-size:22px;flex-shrink:0;line-height:1}
+.wr-event-title{font-weight:700;color:var(--gold);margin-bottom:2px;font-size:13px}
+.wr-event-body{color:var(--ink2)}
+.wr-params-title{font-size:10px;letter-spacing:.12em;color:var(--ink4);text-transform:uppercase;margin-bottom:8px;font-weight:700}
+.wr-rows{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px}
+.wr-row{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px}
+.wr-lbl{font-size:10px;color:var(--ink3);margin-bottom:3px}
+.wr-vals{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.wr-old{font-size:12px;color:var(--ink3)}
+.wr-arrow{font-size:10px;color:var(--ink4)}
+.wr-new{font-size:15px;font-weight:800;font-family:var(--serif)}
+.wr-delta{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px}
+.wr-plus{background:#edf7f1;color:var(--green)}
+.wr-minus{background:#fdf0f0;color:var(--red)}
+.wr-zero{background:var(--bg3);color:var(--ink4)}
+.wr-footer{padding:14px 24px;border-top:1px solid var(--border);flex-shrink:0}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg3)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:50;padding:0 4px env(safe-area-inset-bottom,0)}
+.mob-nav.in-game{display:none}
+.mob-nav-inner{display:flex;align-items:stretch;height:56px}
+.mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;color:var(--ink3);font-family:var(--sans);font-size:9px;padding:4px 2px;border-top:2px solid transparent;transition:all .12s;min-width:0}
+.mob-nav-btn.act{color:var(--gold);border-top-color:var(--gold)}
+.mob-nav-btn .mni{font-size:18px;line-height:1}
+.mob-fab{position:fixed;bottom:68px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;box-shadow:0 3px 14px rgba(42,95,168,.4);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:22px;z-index:51;transition:transform .15s}
+.mob-fab.in-game{display:none}
+.mob-fab:active{transform:scale(.93)}
+@media(max-width:767px){
+.start-logo{margin-bottom:18px;margin-top:12px}
+.start-logo-jp{font-size:26px;letter-spacing:.06em}
+.start-card{padding:20px 18px;border-radius:12px}
+.diff-desc{display:none}
+.diff-btn{padding:10px 4px}
+.diff-name{font-size:13px}
+.school-prev{padding-right:70px}
+.sp-meta{gap:8px;font-size:10px}
+.start-go{font-size:15px;padding:12px}
+.intro-box{padding:16px 12px;border-radius:12px 12px 0 0;max-height:100vh;height:100vh}
+.intro-head{font-size:17px}
+.member-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.gh{height:auto;padding:8px 12px;flex-wrap:wrap;gap:4px}
+.gh-school{font-size:13px}
+.gh-info{font-size:10px;gap:8px;flex-wrap:wrap}
+.gh-week{font-size:10px;padding:1px 7px}
+.game-body{grid-template-columns:1fr;grid-template-rows:1fr}
+.gnav{display:none}
+.gright{display:none}
+.gcontent{padding:12px 12px 72px}
+.mob-nav.in-game{display:flex}
+.mob-fab.in-game{display:flex}
+.stat-grid{grid-template-columns:1fr 1fr}
+.stat-val{font-size:18px}
+.sch-grid{grid-template-columns:repeat(3,1fr)}
+.week-grid{grid-template-columns:1fr 1fr}
+.wk-fx{font-size:8px}
+.mtbl-desktop{display:none}
+.modal{width:100%;max-width:100%;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:85vh;border-bottom:none}
+.overlay{align-items:flex-end}
+.week-result-box{width:100%;max-width:100%;border-radius:16px 16px 0 0;max-height:90vh}
+.week-result-overlay{align-items:flex-end}
+.wr-body{padding:14px 16px}
+.wr-header{padding:14px 16px 12px}
+.wr-footer{padding:10px 16px 16px}
+#ov-comp .modal{border-radius:16px 16px 0 0}
+.prof-stats{grid-template-columns:1fr 1fr}
+.scr-h{font-size:14px}
+}
+@media(max-width:400px){
+.diff-grid{grid-template-columns:1fr 1fr 1fr}
+.diff-star{font-size:10px}
+.stat-val{font-size:16px}
+.sch-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="view active" id="v-start">
+<div class="start-deco"></div>
+<div class="start-logo">
+<div class="start-logo-jp">吹奏楽部シミュレーション</div>
+<div class="start-logo-sub">Wind Band Club Simulator</div>
+<div class="start-logo-accent"></div>
+</div>
+<div class="start-card">
+<div class="start-sec-title">難易度を選択</div>
+<div class="diff-grid">
+<button class="diff-btn sel" onclick="selDiff(this,'easy')">
+<div class="diff-name">弱小校</div>
+<div class="diff-star" style="color:#3a7a50">★☆☆☆☆</div>
+<div class="diff-desc">部員少なめ<br>資金も限られる<br>成長の余地大</div>
+</button>
+<button class="diff-btn" onclick="selDiff(this,'mid')">
+<div class="diff-name">中堅校</div>
+<div class="diff-star" style="color:var(--gold)">★★★☆☆</div>
+<div class="diff-desc">バランス型<br>地区入賞が目標<br>標準的な部活</div>
+</button>
+<button class="diff-btn" onclick="selDiff(this,'hard')">
+<div class="diff-name">強豪校</div>
+<div class="diff-star" style="color:var(--red)">★★★★★</div>
+<div class="diff-desc">人数・技術高め<br>全国前提の期待<br>ハイプレッシャー</div>
+</button>
+</div>
+<div class="start-sec-title">学校をランダム生成</div>
+<div class="school-prev">
+<div class="sp-name" id="prev-name">—</div>
+<div class="sp-meta">
+<span>部員数：<strong id="prev-count">—</strong>名</span>
+<span>顧問：<strong id="prev-adv">—</strong></span>
+<span id="prev-tags"></span>
+</div>
+<button class="reroll" onclick="rollSchool()">🎲 再抽選</button>
+</div>
+<button class="start-go" onclick="startGame()">▶ 部活を始める</button>
+</div>
+</div>
+<div class="view" id="v-intro">
+<div class="intro-box">
+<div class="intro-head" id="intro-name">—</div>
+<div class="intro-sub" id="intro-sub">—</div>
+<div class="member-grid" id="member-grid"></div>
+<div style="text-align:center">
+<button class="btn btn-gold" onclick="enterGame()" style="padding:10px 40px;font-size:14px;font-family:var(--serif);letter-spacing:.15em">部活を開始する ▶</button>
+</div>
+</div>
+</div>
+<div class="view" id="v-game">
+<div class="gh">
+<div style="display:flex;align-items:center;gap:12px">
+<div class="gh-school" id="gh-school">—</div>
+<span class="gh-week" id="gh-week">第1週</span>
+</div>
+<div class="gh-info">
+<span>第<strong id="gh-year">1</strong>クール &nbsp;<strong id="gh-month">4月</strong></span>
+<span>部員 <strong id="gh-mem">0</strong>名</span>
+<span>資金 <strong id="gh-funds">0</strong>円</span>
+<span>士気 <strong id="gh-morale">0</strong></span>
+<span>顧問：<strong id="gh-adv">—</strong></span>
+</div>
+<div style="display:flex;align-items:center;gap:6px">
+<span style="font-size:10px;color:var(--ink3)">評価</span>
+<div class="gh-rep" id="gh-rep">C</div>
+</div>
+</div>
+<div class="game-body">
+<nav class="gnav">
+<div class="gnav-lbl">メニュー</div>
+<button class="gnav-btn act" onclick="showScr('dashboard',this)"><span class="gnav-icon">🏠</span>ダッシュボード</button>
+<button class="gnav-btn" onclick="showScr('weekly',this)"><span class="gnav-icon">📋</span>週間練習</button>
+<button class="gnav-btn" onclick="showScr('members',this)"><span class="gnav-icon">👥</span>部員管理</button>
+<button class="gnav-btn" onclick="showScr('schedule',this)"><span class="gnav-icon">📅</span>年間予定</button>
+<button class="gnav-btn" onclick="showScr('competition',this)"><span class="gnav-icon">🏆</span>コンクール</button>
+<button class="gnav-btn" onclick="showScr('captain',this)"><span class="gnav-icon">👑</span>部長・組織</button>
+<button class="gnav-btn" onclick="showScr('achievements',this)"><span class="gnav-icon">⭐</span>実績</button>
+<div class="gnav-sp"></div>
+<div class="gnav-lbl">進行</div>
+<button class="gnav-btn" onclick="advanceWeek()" style="color:var(--blue);font-weight:700"><span class="gnav-icon">⏭</span>1週間進める</button>
+<button class="gnav-btn" onclick="openRecruit()" id="recruit-nav-btn" style="color:var(--green);display:none"><span class="gnav-icon">🌸</span>新入部員募集</button>
+</nav>
+<main class="gcontent">
+<div class="screen active" id="scr-dashboard">
+<div class="scr-h">📊 部活概況</div>
+<div id="alert-bar" style="margin-bottom:8px"></div>
+<div class="stat-grid">
+<div class="stat-card"><div class="stat-lbl">総合技術力</div><div class="stat-val" id="sv-skill" style="color:var(--blue)">—</div><div class="stat-sub">/ 100</div></div>
+<div class="stat-card"><div class="stat-lbl">アンサンブル</div><div class="stat-val" id="sv-ens" style="color:#7050b0">—</div><div class="stat-sub">/ 100</div></div>
+<div class="stat-card" id="sv-song-card"><div class="stat-lbl">コンクール曲精度</div><div class="stat-val" id="sv-song" style="color:var(--teal)">—</div><div class="stat-sub">/ 100</div></div>
+<div class="stat-card"><div class="stat-lbl">部の士気</div><div class="stat-val" id="sv-morale" style="color:var(--green)">—</div><div class="stat-sub">/ 100</div></div>
+</div>
+<div class="card"><div class="card-h">🎼 パート別技術力</div><div id="skill-bars"></div></div>
+<div class="card"><div class="card-h">📰 活動ログ</div><div id="log-container"></div></div>
+</div>
+<div class="screen" id="scr-weekly">
+<div class="scr-h">📋 週間練習計画</div>
+<div style="background:var(--gold3);border:1px solid rgba(176,125,42,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px">
+<strong id="week-header">第1週（4月）</strong>の練習テーマを選んで「1週間進める」を押してください。
+今月の残り週：<strong id="weeks-left">4</strong>週
+</div>
+<div class="week-grid" id="week-grid"></div>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+<button class="btn btn-primary" onclick="advanceWeek()">⏭ この週を実行</button>
+<span style="font-size:11px;color:var(--ink3)">選択中：<strong id="sel-prac-name" style="color:var(--blue)">なし</strong></span>
+</div>
+<div class="card" id="prac-preview" style="display:none">
+<div class="card-h">📈 効果予測</div>
+<div id="prac-preview-body" style="font-size:12px;color:var(--ink2)"></div>
+</div>
+</div>
+<div class="screen" id="scr-members">
+<div class="scr-h">👥 部員管理</div>
+<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap" id="part-filter"></div>
+<div class="card mtbl-desktop" style="padding:0;overflow:hidden">
+<table class="mtbl">
+<thead><tr>
+<th>名前</th><th>学年</th><th>パート</th>
+<th>演奏力</th><th>表現力</th><th>スタミナ</th><th>士気</th>
+<th>性格</th><th>状態</th>
+</tr></thead>
+<tbody id="member-tbody"></tbody>
+</table>
+</div>
+<div class="mob-member-list" id="mob-member-list" style="display:none"></div>
+</div>
+<div class="screen" id="scr-schedule">
+<div class="scr-h">📅 年間スケジュール</div>
+<div class="sch-grid" id="sch-grid"></div>
+<div class="card"><div class="card-h">📝 詳細</div><div id="sch-detail" style="font-size:12px;color:var(--ink2)">月をクリック</div></div>
+</div>
+<div class="screen" id="scr-competition">
+<div class="scr-h">🏆 コンクール</div>
+<div class="card">
+<div class="card-h">🎼 今年度の編成</div>
+<div id="division-status" style="font-size:12px;color:var(--ink2)">—</div>
+</div>
+<div class="card"><div class="card-h">📊 次大会予測</div><div id="next-comp" style="font-size:12px;color:var(--ink2)">—</div></div>
+<div class="scr-h" style="font-size:13px;margin-top:4px">📜 履歴</div>
+<div id="comp-hist"><div style="color:var(--ink3);text-align:center;padding:20px">まだ参加していません</div></div>
+</div>
+<div class="screen" id="scr-captain">
+<div class="scr-h">👑 部長・組織</div>
+<div class="card" id="captain-card"><div style="color:var(--ink3)">まだ部長が決まっていません</div></div>
+<div class="card" id="exec-card" style="display:none">
+<div class="card-h">🎖 幹部一覧</div>
+<div id="exec-list"></div>
+</div>
+<div class="card">
+<div class="card-h">💰 部費・資金管理</div>
+<div id="dues-info" style="font-size:12px;color:var(--ink2);margin-bottom:10px">—</div>
+<button class="btn btn-sm" onclick="openDuesModal()">部費を見直す</button>
+</div>
+<div class="card">
+<div class="card-h">👑 部長選出</div>
+<div id="captain-select-area" style="font-size:12px;color:var(--ink2)">部長の選出は2〜3月に行えます</div>
+</div>
+</div>
+<div class="screen" id="scr-achievements">
+<div class="scr-h">⭐ 実績・目標</div>
+<div class="card"><div id="ach-list"></div></div>
+</div>
+</main>
+<aside class="gright">
+<div class="rp-sec">
+<div class="rp-lbl">現在</div>
+<div style="font-family:var(--serif);font-size:22px;font-weight:800;color:var(--blue)" id="rp-month">4月</div>
+<div style="font-size:11px;color:var(--ink2);margin-top:1px" id="rp-week-info">第1週 / 第1クール</div>
+</div>
+<div class="rp-sec">
+<div class="rp-lbl">部長</div>
+<div id="rp-captain" style="color:var(--ink2)">未選出</div>
+</div>
+<div class="rp-sec">
+<div class="rp-lbl">今クール目標</div>
+<div id="rp-goal" style="color:var(--gold);font-weight:700;font-size:12px">—</div>
+<div style="color:var(--ink3);font-size:10px;margin-top:1px">最終目標：全国大会金賞</div>
+</div>
+<div class="rp-sec">
+<div class="rp-lbl">パート人数</div>
+<div id="rp-parts" style="font-size:11px"></div>
+</div>
+<div class="rp-sec">
+<div class="rp-lbl">今後の大会</div>
+<div id="rp-comps" style="font-size:11px;color:var(--ink2)"></div>
+</div>
+</aside>
+</div>
+</div>
+<div class="overlay" id="ov-profile">
+<div class="modal">
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+<div class="prof-avatar" id="prof-avatar"></div>
+<div>
+<div style="font-family:var(--serif);font-size:20px;font-weight:800" id="prof-name"></div>
+<div style="font-size:12px;color:var(--ink2);margin-top:3px" id="prof-meta"></div>
+</div>
+</div>
+<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--ink2)" id="prof-bio"></div>
+<div class="prof-stats" id="prof-stats"></div>
+<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--ink2);margin-bottom:12px" id="prof-personality-box"></div>
+<button class="btn btn-sm" onclick="closeModal('ov-profile')">閉じる</button>
+</div>
+</div>
+<div class="overlay" id="ov-comp">
+<div class="modal" style="text-align:center">
+<div id="comp-result-body"></div>
+<button class="btn btn-primary" onclick="closeModal('ov-comp')" style="margin-top:16px">続ける</button>
+</div>
+</div>
+<div class="overlay" id="ov-division">
+<div class="modal">
+<div class="modal-title">🎺 編成規模を選択</div>
+<div style="font-size:12px;color:var(--ink2);margin-bottom:16px">今年度のコンクールに参加する編成を選んでください。年度中は変更できません。</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+<button onclick="chooseDivision('mid')" style="background:var(--teal2);border:2px solid var(--teal);border-radius:10px;padding:16px;cursor:pointer;text-align:left;font-family:var(--sans)">
+<div style="font-family:var(--serif);font-size:16px;font-weight:800;color:var(--teal);margin-bottom:6px">🎻 中編成</div>
+<div style="font-size:11px;color:var(--ink2);line-height:1.6">規定：35人以下<br>ルート：県大会→支部大会→東日本大会<br>通過：県5校→支部2校</div>
+<div id="div-mid-count" style="font-size:11px;margin-top:6px;font-weight:700"></div>
+</button>
+<button onclick="chooseDivision('large')" style="background:var(--blue2);border:2px solid var(--blue);border-radius:10px;padding:16px;cursor:pointer;text-align:left;font-family:var(--sans)">
+<div style="font-family:var(--serif);font-size:16px;font-weight:800;color:var(--blue);margin-bottom:6px">🎺 大編成</div>
+<div style="font-size:11px;color:var(--ink2);line-height:1.6">規定：55人以上<br>ルート：地区→県→支部→全国大会<br>通過：地区16→県6→支部3校</div>
+<div id="div-large-count" style="font-size:11px;margin-top:6px;font-weight:700"></div>
+</button>
+</div>
+<div style="font-size:11px;color:var(--ink3)">※ 規定人数を下回っても出場できますが、採点でペナルティが生じます</div>
+</div>
+</div>
+<div class="overlay" id="ov-dues">
+<div class="modal">
+<div class="modal-title">💰 部費の見直し</div>
+<div id="dues-body"></div>
+<div style="display:flex;gap:8px;margin-top:14px">
+<button class="btn btn-sm" onclick="closeModal('ov-dues')">キャンセル</button>
+</div>
+</div>
+</div>
+<div class="overlay" id="ov-recruit">
+<div class="modal">
+<div class="modal-title">🌸 新入部員募集</div>
+<div id="recruit-body"></div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="btn btn-sm" onclick="closeModal('ov-recruit')">閉じる</button>
+</div>
+</div>
+</div>
+<div class="ev-popup-overlay" id="ev-overlay" onclick="closeEventPopup()"></div>
+<div class="ev-popup" id="ev-popup">
+<div id="ev-icon" style="font-size:44px;margin-bottom:8px"></div>
+<div id="ev-title" style="font-family:var(--serif);font-size:18px;font-weight:800;margin-bottom:8px"></div>
+<div id="ev-body" style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:14px"></div>
+<div id="ev-effect" style="font-size:12px;font-weight:700;margin-bottom:14px"></div>
+<button class="btn btn-primary btn-sm" onclick="closeEventPopup()">OK</button>
+</div>
+<div class="week-result-overlay" id="ov-week-result">
+<div class="week-result-box">
+<div class="wr-header">
+<div class="wr-week-badge" id="wr-week-badge">第1週</div>
+<div class="wr-title" id="wr-title">週の記録</div>
+<div id="wr-prac-label-wrap"></div>
+</div>
+<div class="wr-body" id="wr-body">
+<div class="wr-story-wrap" id="wr-story-wrap"></div>
+<div id="wr-event-area"></div>
+<div class="wr-params-title">パラメーター変動</div>
+<div class="wr-rows" id="wr-rows"></div>
+</div>
+<div class="wr-footer">
+<button class="btn btn-primary" style="width:100%;font-family:var(--serif);font-size:14px;letter-spacing:.1em" onclick="closeWeekResult()" id="wr-continue-btn">続ける</button>
+</div>
+</div>
+</div>
+<div class="mob-nav" id="mob-nav">
+<div class="mob-nav-inner">
+<button class="mob-nav-btn act" onclick="mobNav('dashboard',this)"><span class="mni">🏠</span>ホーム</button>
+<button class="mob-nav-btn" onclick="mobNav('weekly',this)"><span class="mni">🎵</span>練習</button>
+<button class="mob-nav-btn" onclick="mobNav('members',this)"><span class="mni">👥</span>部員</button>
+<button class="mob-nav-btn" onclick="mobNav('schedule',this)"><span class="mni">📅</span>予定</button>
+<button class="mob-nav-btn" onclick="mobNav('competition',this)"><span class="mni">🏆</span>大会</button>
+<button class="mob-nav-btn" onclick="mobNav('captain',this)"><span class="mni">👑</span>組織</button>
+</div>
+</div>
+<button class="mob-fab" id="mob-fab" onclick="advanceWeek()" title="1週間進める">⏭</button>
+<div id="notif"><div id="notif-title"></div><div id="notif-body"></div></div>
+<script src="suisougaku.js"></script>
+</body>
+</html>
