@@ -329,6 +329,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <button class="reroll" onclick="rollSchool()">🎲 再抽選</button>
 </div>
 <button class="start-go" onclick="startGame()">▶ 部活を始める</button>
+<button onclick="openSaveModal()" style="width:100%;margin-top:8px;padding:9px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:13px;cursor:pointer;color:var(--ink2)">💾 セーブデータをロードする</button>
 </div>
 </div>
 <div class="view" id="v-intro">
@@ -355,6 +356,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <span>顧問：<strong id="gh-adv">—</strong></span>
 </div>
 <div style="display:flex;align-items:center;gap:6px">
+<button onclick="openSaveModal()" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;color:var(--ink2);font-family:var(--sans)">💾 セーブ</button>
 <span style="font-size:10px;color:var(--ink3)">評価</span>
 <div class="gh-rep" id="gh-rep">C</div>
 </div>
@@ -479,6 +481,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div id="rp-comps" style="font-size:11px;color:var(--ink2)"></div>
 </div>
 </aside>
+</div>
+</div>
+<div class="overlay" id="ov-save">
+<div class="modal" style="max-width:420px;width:95vw">
+<div style="font-family:var(--serif);font-size:17px;font-weight:800;margin-bottom:4px">💾 セーブ／ロード</div>
+<div style="font-size:11px;color:var(--ink3);margin-bottom:14px">スロットを選んで保存・読み込みができます</div>
+<div id="save-slots"></div>
+<button class="btn" onclick="closeModal('ov-save')" style="margin-top:8px;width:100%">閉じる</button>
 </div>
 </div>
 <div class="overlay" id="ov-profile">

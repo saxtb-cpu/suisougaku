@@ -1,12 +1,74 @@
-const LAST=['田中','鈴木','佐藤','山田','渡辺','中村','小林','加藤','吉田','松本','井上','木村','林','斎藤','清水','山口','池田','橋本','阿部','石川','山本','前田','村上','長谷川','近藤','和田','石井','福田','大野','中川','岡田','藤田','藤井','野口','高橋','伊藤','中島','小川','工藤','原田','西村'];
-const FIRST_F=['桜','仁美','愛奈','葵','里奈','結衣','朱里','美紀','華','琴','望','光','恵','舞','千尋','彩香','夏美','香織','恵美','美緒','里緒','文香','星奈','優香','詩織','桃子','香奈','一花','遥','翼','凛','麻衣','理沙','彩乃','奈々','真由','沙希','美咲','あんな','柚希'];
-const FIRST_M=['太郎','健人','勇樹','陽翔','颯','陸','光輝','翔','蓮','春輝','智也','大輝','雅人','純','弘樹','海斗','悠斗','彰','直哉','哲也','圭','亮','真也','大輝','康平','悠','湊','蒼','颯太','昂'];
+const LAST=[
+  '田中','鈴木','佐藤','山田','渡辺','中村','小林','加藤','吉田','松本',
+  '井上','木村','林','斎藤','清水','山口','池田','橋本','阿部','石川',
+  '山本','前田','村上','長谷川','近藤','和田','石井','福田','大野','中川',
+  '岡田','藤田','藤井','野口','高橋','伊藤','中島','小川','工藤','原田',
+  '西村','松田','岡本','浜田','川口','斉藤','宮崎','菊地','白石','三浦',
+  '谷口','今井','安藤','太田','水野','坂本','内田','永田','大塚','森田',
+  '上田','千葉','関口','藤本','菅原','金子','島田','後藤','横山','増田',
+  '星野','辻','平野','杉本','青木','片山','南','河野','新井','徳田',
+];
+const FIRST_F=[
+  // 漢字系
+  '桜','仁美','愛奈','葵','里奈','結衣','朱里','美紀','華','琴',
+  '望','光','恵','舞','千尋','彩香','夏美','香織','恵美','美緒',
+  '里緒','文香','星奈','優香','詩織','桃子','香奈','一花','遥','翼',
+  '凛','麻衣','理沙','彩乃','奈々','真由','沙希','美咲','柚希','澪',
+  '陽菜','花音','心春','日向','咲良','彩','柚月','莉子','紬','唯',
+  '七海','菜摘','明日香','瑠奈','亜美','千夏','真凜','愛梨','桜子','玲奈',
+  // ひらがな系
+  'あかり','いずみ','うみ','えみ','おとは',
+  'かのん','きらら','くるみ','このは','こまち',
+  'さくら','しおり','すずな','せな','そら',
+  'なつき','にこ','ののか','はな','ひより',
+  'まなか','みう','むつみ','めい','もも',
+  'ゆい','ゆか','よりこ','りの','るか',
+];
+const FIRST_M=[
+  // 漢字系
+  '太郎','健人','勇樹','陽翔','颯','陸','光輝','翔','蓮','春輝',
+  '智也','大輝','雅人','純','弘樹','海斗','悠斗','彰','直哉','哲也',
+  '圭','亮','真也','康平','悠','湊','蒼','颯太','昂','颯人',
+  '蒼空','陽大','悠真','凌','律','奏','碧','樹','瑛太','朔',
+  '一颯','旺太','翔太','大和','柊','陽斗','湊斗','悠人','将吾','誠',
+  // ひらがな系
+  'あきら','いつき','うた','おとや',
+  'かいと','きよと','くうが','こうた',
+  'さとし','じゅん','そうた','たいが',
+  'なおき','はると','ひびき','ふうと',
+  'まこと','みつき','むさし','やまと',
+  'ゆうと','よしき','りく','れん',
+];
 const ADV_F=['田村 あき子','高木 由美','中森 信子','佐伯 美奈','杉浦 恵','宮本 直子','岩田 康子','桐島 千恵','松岡 理恵','福永 智子'];
 const ADV_M=['中谷 敏行','岡野 俊介','三浦 勇気','吉川 誠二','黒岩 一郎','石橋 健','磯部 義夫','河合 稔','堀田 雅彦','宮田 良平'];
 const SCH_PFX=['桜丘','緑陵','北星','南風','東明','西陽','青空','白鷹','若葉','光陵','翠嶺','朱雀','玄武','蒼龍','鳳凰','月見野','星ヶ丘','夕映え','黎明','旭川','梅が丘','桐林','瑞穂','銀河','曙'];
 const SCH_SFX=['高校','第一高校','附属高校','学園高校','中学校'];
 const SCH_FEAT=['強豪OB多数','専用練習棟あり','楽器設備充実','保護者会が活発','顧問の指導実績豊富','地域密着型','コンクール常連','歴史ある部活'];
 const PARTS=['フルート','クラリネット','サックス','トランペット','トロンボーン','ホルン','チューバ','打楽器','オーボエ'];
+
+// 自由曲の特性プール（毎年2つランダム選択）
+const JIYU_TRAITS=[
+  {trait:'dramatic',  traitLabel:'ドラマティック', traitDesc:'クライマックスへの盛り上がりが鍵。モチベーションと表現力が問われる。',
+   scoreWeight:{skill:0.30,ensemble:0.25,song:0.30,morale:0.15}},
+  {trait:'technical', traitLabel:'超絶技巧',       traitDesc:'高度な個人技が随所に要求される。スキルが高い部員ほど加点が大きい。',
+   scoreWeight:{skill:0.55,ensemble:0.20,song:0.15,morale:0.10}},
+  {trait:'lyrical',   traitLabel:'歌心重視',       traitDesc:'美しいメロディーラインと表現力が命。アンサンブルの繊細さが問われる。',
+   scoreWeight:{skill:0.20,ensemble:0.45,song:0.25,morale:0.10}},
+  {trait:'rhythmic',  traitLabel:'リズム重視',     traitDesc:'複雑なリズムパターンが続く。打楽器・全体のグルーヴ感が重要。',
+   scoreWeight:{skill:0.35,ensemble:0.30,song:0.25,morale:0.10}},
+  {trait:'stamina',   traitLabel:'長大曲',         traitDesc:'演奏時間が長くスタミナ勝負。後半まで集中力を維持できるかが鍵。',
+   scoreWeight:{skill:0.25,ensemble:0.25,song:0.25,morale:0.25}},
+  {trait:'ensemble',  traitLabel:'全体調和重視',   traitDesc:'パート間のバランスと統一感が評価の中心。アンサンブル力が直結する。',
+   scoreWeight:{skill:0.20,ensemble:0.55,song:0.15,morale:0.10}},
+  {trait:'solo',      traitLabel:'ソリスト勝負',   traitDesc:'特定パートのソロが多く、担当部員の実力が結果を左右する。',
+   scoreWeight:{skill:0.50,ensemble:0.15,song:0.25,morale:0.10}},
+  {trait:'modern',    traitLabel:'現代音楽的',     traitDesc:'不協和音・特殊奏法が多用される。難しいが審査員の印象に残りやすい。',
+   scoreWeight:{skill:0.50,ensemble:0.25,song:0.15,morale:0.10}},
+];
+function pickJiyuTraits(){
+  const shuffled=[...JIYU_TRAITS].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0,2);
+}
 const PART_W={フルート:12,クラリネット:18,サックス:12,トランペット:14,トロンボーン:10,ホルン:8,チューバ:5,打楽器:13,オーボエ:8};
 const PART_COL={フルート:'#2a8aaa',クラリネット:'#3a7a50',サックス:'#a07020',トランペット:'#b04020',トロンボーン:'#7040a0',ホルン:'#1a6090',チューバ:'#804040',打楽器:'#606060',オーボエ:'#406040'};
 const PART_BG={フルート:'#e8f5fa',クラリネット:'#edf7f1',サックス:'#fdf6e6',トランペット:'#fdf0ec',トロンボーン:'#f5eeff',ホルン:'#e8f3fa',チューバ:'#fdf0f0',打楽器:'#f5f5f5',オーボエ:'#edf5ee'};
@@ -576,6 +638,80 @@ if(mtd) mtd.style.display=isMob?'none':'block';
 addLog('部活がスタート！全国金賞を目指して頑張りましょう。','システム');
 setTimeout(()=>openDivisionModal(), 800);
 }
+
+// ================================================================
+// 士気伝染システム
+// ================================================================
+function applyMoraleContagion(){
+  if(!G.members||!G.members.length) return null;
+  const total = G.members.length;
+
+  // 低士気部員（35以下）と高士気部員（75以上）を集計
+  const lowMoraleMembers  = G.members.filter(m=>m.morale<=35);
+  const highMoraleMembers = G.members.filter(m=>m.morale>=75);
+  const lowRatio  = lowMoraleMembers.length  / total;
+  const highRatio = highMoraleMembers.length / total;
+
+  // 部長・ムードメーカーの抑制効果
+  const cap_ = G.captain;
+  const moodmakers = G.members.filter(m=>m.personality==='ムードメーカー'||m.personality==='リーダーシップ型');
+  const suppressPower = (cap_&&cap_.morale>50?0.35:0) + moodmakers.filter(m=>m.morale>50).length*0.12;
+
+  // 伝染が起きる閾値：低士気が15%以上で発動
+  if(lowRatio < 0.15) {
+    // 低士気が少ない＆高士気が多い→じわっと底上げ
+    if(highRatio > 0.40){
+      G.members.forEach(m=>{
+        if(m.morale < 60 && Math.random() < 0.25){
+          m.morale = cap(m.morale + rnd(1,3));
+        }
+      });
+    }
+    G._lowMoraleStreak = 0;
+    return null;
+  }
+
+  // 低士気が続いた週数を累積
+  G._lowMoraleStreak = (G._lowMoraleStreak||0) + 1;
+  const streak = G._lowMoraleStreak;
+
+  // 伝染強度：低士気比率×継続週数で増大、抑制効果で軽減
+  const baseSpread = Math.min(0.7, lowRatio * 1.8 + streak * 0.04) * (1 - suppressPower);
+
+  let affected = 0;
+  G.members.forEach(m=>{
+    if(m.morale <= 35) return; // 既に低い子はスキップ
+
+    // 同パートに低士気部員がいると影響大
+    const samePart = lowMoraleMembers.filter(lm=>lm.part===m.part);
+    const partFactor = samePart.length > 0 ? 1.5 : 1.0;
+
+    // 性格による耐性
+    const resistance = m.personality==='努力家'?0.4
+      : m.personality==='完璧主義者'?0.5
+      : m.personality==='リーダーシップ型'?0.3
+      : m.personality==='ムードメーカー'?0.2
+      : m.personality==='繊細なアーティスト'?1.4
+      : m.personality==='人見知り'?1.2
+      : m.personality==='お調子者'?1.1 : 1.0;
+
+    const spreadChance = baseSpread * partFactor * resistance;
+    if(Math.random() < spreadChance){
+      const penalty = rnd(1, Math.min(8, 2 + streak));
+      m.morale = cap(m.morale - penalty);
+      affected++;
+    }
+  });
+
+  // イベント通知
+  if(affected > 0){
+    const severity = lowRatio >= 0.40 ? 'critical' : lowRatio >= 0.25 ? 'serious' : 'mild';
+    return {affected, streak, severity,
+      lowCount: lowMoraleMembers.length,
+      names: lowMoraleMembers.slice(0,2).map(m=>m.name)};
+  }
+  return null;
+}
 function recalc(){
 if(!G.members||!G.members.length)return;
 G.skill   =cap(G.members.reduce((a,m)=>a+m.skill,0)/G.members.length);
@@ -635,6 +771,12 @@ const names=(G.shirkerIds).map(id=>G.members.find(m=>m.id===id)?.name).filter(Bo
 alerts.push(`<div style="background:var(--red2);border:1px solid var(--red);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--red);margin-bottom:4px">😴 <strong>さぼり中：${names}</strong>　→ 合奏やコンサート系の練習で解消できます</div>`);
 }
 if(G.songBoredom>=3) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">😑 <strong>曲練習マンネリ</strong>　→ 基礎練習・パート練習を挟みましょう</div>`);
+// 低士気アラート
+const _lowMCount = G.members ? G.members.filter(m=>m.morale<=35).length : 0;
+const _lowMRatio = G.members.length ? _lowMCount/G.members.length : 0;
+if(_lowMRatio>=0.40) alerts.push(`<div style="background:var(--red2);border:1px solid var(--red);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--red);margin-bottom:4px">💀 <strong>士気危機</strong>　低士気部員が${_lowMCount}人！このままでは全体崩壊の恐れ</div>`);
+else if(_lowMRatio>=0.25) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">😞 <strong>士気低下が広がっています</strong>　低士気部員：${_lowMCount}人 → メンタル強化か個別ケアを</div>`);
+else if(_lowMRatio>=0.15) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">⚠️ <strong>落ち込んでいる部員がいます</strong>　士気の低い子が${_lowMCount}人います</div>`);
 if(G.sectionalDebt>=3) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">⚠️ <strong>パート練習不足</strong>　→ パート練習でクオリティを高めましょう</div>`);
 alertBar.innerHTML=alerts.join('');
 }
@@ -947,9 +1089,30 @@ ${warnings.map(w=>`<div style="color:var(--amber);font-size:10px;margin-top:2px"
 }
 function advanceWeek(){
 recalc();
+// 士気伝染チェック（練習前に適用）
+const contagion = applyMoraleContagion();
 const before={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds};
 let pracName=null;
 let eventData=null;
+// 伝染が起きていたらイベントとして反映
+if(contagion && !eventData){
+  const {affected, streak, severity, lowCount, names} = contagion;
+  const nameStr = names.length ? names.join('、') : '数名';
+  if(severity==='critical'){
+    eventData={icon:'💀',title:'部の雰囲気が最悪に',
+      body:`${nameStr}らの落ち込みが全体に広がり、練習室の空気が重苦しい。このままでは崩壊しかねない。`,
+      col:'var(--red)'};
+    addLog(`士気危機：低士気が${lowCount}人に蔓延（${streak}週継続）`,'警告');
+  } else if(severity==='serious'){
+    eventData={icon:'😞',title:'暗い雰囲気が広がっている',
+      body:`${nameStr}などの落ち込みが周囲に影響し始めている。早めに手を打ちたい。`,
+      col:'var(--amber)'};
+    if(streak>=3) addLog(`士気低下が${streak}週続いている。対処が必要。`,'警告');
+  } else {
+    // mild：イベントは出さず、週報に軽く記載するだけ
+    if(streak>=2) addLog(`${nameStr}の落ち込みが周囲に少し影響している。`,'状況');
+  }
+}
 if(selPracId){
 const p=PRACTICES.find(x=>x.id===selPracId);
 if(p.cost&&G.funds<p.cost){notif('資金不足','外部講師を招く資金が不足しています');return;}
@@ -1082,13 +1245,19 @@ const skillDelta=after.skill-before.skill;
 const moraleDelta=after.morale-before.morale;
 const songDelta=after.song-before.song;
 const isSeason=G.month>=7&&G.month<=10;
-const pieceInfo=G.kaDaiKyoku?.jiyu?`自由曲「${G.kaDaiKyoku.jiyu.title}」`:'';
+const _sj=G.kaDaiKyoku?.selectedJiyu||(Array.isArray(G.kaDaiKyoku?.jiyu)?G.kaDaiKyoku.jiyu[0]:G.kaDaiKyoku?.jiyu);
+const _sk=G.kaDaiKyoku?.selectedKadai;
+const pieceInfo=_sk&&_sj?`課題曲「${_sk.title}」／自由曲「${_sj.title}」`:_sj?`自由曲「${_sj.title}」`:'';
 const shirkerNames=(G.shirkerIds||[]).map(id=>G.members.find(m=>m.id===id)?.name).filter(Boolean);
 const extraCtx=[];
 if(shirkerNames.length) extraCtx.push(`さぼり中の部員：${shirkerNames.join('、')}`);
 if(G.songBoredom>=2) extraCtx.push('曲練習のマンネリが出てきた');
 if(G.sectionalDebt>=2) extraCtx.push('パート練習が不足している');
 if(G.conflictActive) extraCtx.push('部内でいざこざがある');
+const _lowM=G.members.filter(m=>m.morale<=35);
+if(_lowM.length>=3) extraCtx.push(`${_lowM.slice(0,2).map(m=>m.name).join('、')}など${_lowM.length}人が落ち込んでいて部の雰囲気に影響している`);
+else if(_lowM.length>0) extraCtx.push(`${_lowM[0].name}の士気が低く周囲が気にかけている`);
+if(G._lowMoraleStreak>=3) extraCtx.push('暗い雰囲気が数週間続いている');
 const ANGLES=[
 '今週のハイライトシーンを、部員の心情を中心に描写する',
 '中高生らしいユーモラスな場面や軽口を中心に描く（クスっと笑えるトーンで）',
@@ -1363,10 +1532,25 @@ function getNextComp(){
 return G.compSchedule.find(s=>s.qualified&&!s.done)||null;
 }
 function calcScore(){
+// 選んだ課題曲の特性でウェイト変動
+const selK=G.kaDaiKyoku?.selectedKadai;
+const selJ=G.kaDaiKyoku?.selectedJiyu;
+// 課題曲と自由曲のウェイトを平均して使う
+const wK=selK?.scoreWeight||{skill:0.38,ensemble:0.32,song:0.22,morale:0.08};
+const wJ=selJ?.scoreWeight||wK;
+const w={
+  skill:   Math.round((wK.skill   + wJ.skill)   /2*100)/100,
+  ensemble:Math.round((wK.ensemble+ wJ.ensemble) /2*100)/100,
+  song:    Math.round((wK.song    + wJ.song)     /2*100)/100,
+  morale:  Math.round((wK.morale  + wJ.morale)   /2*100)/100,
+};
+const avgStamina=G.members.length?Math.round(G.members.reduce((a,m)=>a+m.stamina,0)/G.members.length):50;
+const staminaBonus=selK?.trait==='stamina'?Math.round((avgStamina-50)*0.15):0;
+const diffBonus=selK?Math.round((selK.difficulty-3)*2.5):0;
 const memberCount=G.members.length;
 const reqCount=G.division==='large'?55:35;
 const countPenalty=Math.max(0,(reqCount-memberCount)*0.3);
-const base=G.skill*.38+G.ensemble*.32+G.song*.22+G.morale*.08;
+const base=G.skill*(w.skill||0.38)+G.ensemble*(w.ensemble||0.32)+G.song*(w.song||0.22)+G.morale*(w.morale||0.08)+staminaBonus+diffBonus;
 const captainBonus=G.captain?3:0;
 const plBonus=(G.partLeaders&&G.partLeaders.length>=3)?2:0; // パートリーダーが揃うとボーナス
 const conflictPenalty=G.conflictActive?6:0;
@@ -1811,14 +1995,17 @@ const prompt=`吹奏楽コンクールの課題曲と自由曲を生成してく
 以下の形式でJSONのみを返してください（前後の説明不要）：
 {
 "kadai": [
-{"number": "課題曲I", "title": "曲名（架空でOK）", "difficulty": 3, "style": "明るいマーチ風", "desc": "曲の特徴2文"},
-{"number": "課題曲II", "title": "曲名", "difficulty": 4, "style": "叙情的な歌謡曲風", "desc": "曲の特徴2文"},
-{"number": "課題曲III", "title": "曲名", "difficulty": 4, "style": "勇壮なコンサートマーチ", "desc": "曲の特徴2文"},
-{"number": "課題曲IV", "title": "曲名", "difficulty": 5, "style": "現代的なコンサートピース", "desc": "曲の特徴2文"}
+{"number": "課題曲I",   "title": "曲名（架空）", "difficulty": 3, "style": "明るいマーチ風",       "trait": "solo",      "traitLabel": "ソロ重視",    "traitDesc": "個人技が問われる特性の説明", "scoreWeight": {"skill":0.50,"ensemble":0.20,"song":0.20,"morale":0.10}, "desc": "曲の特徴2文"},
+{"number": "課題曲II",  "title": "曲名（架空）", "difficulty": 4, "style": "叙情的な歌謡曲風",     "trait": "ensemble",  "traitLabel": "バンド力重視", "traitDesc": "アンサンブルが鍵の説明",   "scoreWeight": {"skill":0.25,"ensemble":0.50,"song":0.15,"morale":0.10}, "desc": "曲の特徴2文"},
+{"number": "課題曲III", "title": "曲名（架空）", "difficulty": 4, "style": "勇壮なコンサートマーチ", "trait": "stamina",   "traitLabel": "スタミナ重視", "traitDesc": "体力が問われる特性の説明",   "scoreWeight": {"skill":0.30,"ensemble":0.25,"song":0.25,"morale":0.20}, "desc": "曲の特徴2文"},
+{"number": "課題曲IV",  "title": "曲名（架空）", "difficulty": 5, "style": "現代的なコンサートピース","trait": "technical", "traitLabel": "高難度",      "traitDesc": "技術力が問われる特性の説明",   "scoreWeight": {"skill":0.55,"ensemble":0.25,"song":0.15,"morale":0.05}, "desc": "曲の特徴2文"}
 ],
-"jiyu": {"title": "自由曲タイトル（架空でOK）", "difficulty": ${Math.min(5,Math.ceil(G.skill/20))}, "composer": "架空の作曲者名", "desc": "自由曲の特徴3文。どんな場面があるか、技術的な挑戦点など。"}
+"jiyu": [
+{"title": "自由曲タイトル1（架空）", "difficulty": ${Math.min(5,Math.ceil(G.skill/20)+1)}, "composer": "架空の作曲者名", "trait": "特性キー", "traitLabel": "特性ラベル", "traitDesc": "特性の説明1文", "scoreWeight": {"skill":0.35,"ensemble":0.30,"song":0.25,"morale":0.10}, "desc": "自由曲の特徴2文"},
+{"title": "自由曲タイトル2（架空）", "difficulty": ${Math.max(2,Math.ceil(G.skill/20)-1)}, "composer": "架空の作曲者名", "trait": "特性キー", "traitLabel": "特性ラベル", "traitDesc": "特性の説明1文", "scoreWeight": {"skill":0.35,"ensemble":0.30,"song":0.25,"morale":0.10}, "desc": "自由曲の特徴2文"}
+]
 }
-difficultyは1〜5の整数。曲名は日本語または英語で、実在しない架空の曲名。`;
+difficultyは2〜5の整数。4曲の難易度は必ず全て異なる値（2,3,4,5をそれぞれ1回ずつ使用）にしてください。どの特性の曲が難しいかは年によって変わります。曲名は日本語または英語で、実在しない架空の曲名。`;
 const res=await fetch('https://api.anthropic.com/v1/messages',{
 method:'POST',
 headers:{'Content-Type':'application/json'},
@@ -1831,14 +2018,36 @@ const parsed=JSON.parse(jsonStr);
 G.kaDaiKyoku=parsed;
 showKaDaiKyokuModal(parsed);
 } catch(e){
+// 難易度をシャッフル（毎年ランダムに割り当て）
+const _diffs=[2,3,4,5]; // 易〜難の4段階をシャッフル
+for(let i=_diffs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_diffs[i],_diffs[j]]=[_diffs[j],_diffs[i]];}
 G.kaDaiKyoku={
 kadai:[
-{number:'課題曲I',   title:'大空への序曲',       difficulty:3,style:'明るいマーチ',       desc:'軽快なリズムが特徴的なマーチ。木管楽器の華やかなソロが聴き所。'},
-{number:'課題曲II',  title:'青い風の詩',          difficulty:4,style:'抒情的な歌謡風',     desc:'ゆったりとした旋律が美しい叙情曲。フルートとオーボエが際立つ。'},
-{number:'課題曲III', title:'光の凱旋',            difficulty:4,style:'勇壮なコンサートマーチ',desc:'金管の力強さと打楽器の存在感が映えるダイナミックな作品。'},
-{number:'課題曲IV',  title:'彼方への飛翔',        difficulty:5,style:'現代的コンサートピース',desc:'変拍子と複雑なハーモニーが特徴。上級者向けの挑戦的な作品。'},
+{number:'課題曲I',   title:'大空への序曲',       difficulty:_diffs[0],style:'明るいマーチ',
+ trait:'solo',    traitLabel:'ソロ重視',    traitDesc:'木管・金管のソロが多く個人技が光る。個々の演奏力が問われる。',
+ scoreWeight:{skill:0.50,ensemble:0.20,song:0.20,morale:0.10},
+ desc:'軽快なリズムが特徴的なマーチ。木管楽器の華やかなソロが聴き所。'},
+{number:'課題曲II',  title:'青い風の詩',          difficulty:_diffs[1],style:'抒情的な歌謡風',
+ trait:'ensemble', traitLabel:'バンド力重視', traitDesc:'全体のハーモニーとブレンドが鍵。アンサンブル力が高いほど有利。',
+ scoreWeight:{skill:0.25,ensemble:0.50,song:0.15,morale:0.10},
+ desc:'ゆったりとした旋律が美しい叙情曲。フルートとオーボエが際立つ。'},
+{number:'課題曲III', title:'光の凱旋',            difficulty:_diffs[2],style:'勇壮なコンサートマーチ',
+ trait:'stamina',  traitLabel:'スタミナ重視', traitDesc:'テンポが速く体力を消耗する。スタミナの高い部員が多いほど有利。',
+ scoreWeight:{skill:0.30,ensemble:0.25,song:0.25,morale:0.20},
+ desc:'金管の力強さと打楽器の存在感が映えるダイナミックな作品。'},
+{number:'課題曲IV',  title:'彼方への飛翔',        difficulty:_diffs[3],style:'現代的コンサートピース',
+ trait:'technical', traitLabel:'高難度',     traitDesc:'変拍子・複雑な和声が特徴。技術力が高いほど大きな加点が得られる。',
+ scoreWeight:{skill:0.55,ensemble:0.25,song:0.15,morale:0.05},
+ desc:'変拍子と複雑なハーモニーが特徴。上級者向けの挑戦的な作品。'},
 ],
-jiyu:{title:'大地の詩〜輝ける明日へ',difficulty:Math.min(5,Math.ceil(G.skill/20)),composer:'架空 太郎',desc:'雄大な自然をテーマにした管弦楽的スケールの大曲。冒頭の打楽器のソロから一気に全奏へ。中間部の木管アンサンブルが美しく、終盤に向けてクライマックスを迎える。'}
+jiyu:[
+  {title:'大地の詩〜輝ける明日へ', difficulty:Math.min(5,Math.ceil(G.skill/20)+1), composer:'架空 太郎',
+   ...pickJiyuTraits()[0],
+   desc:'雄大な自然をテーマにした管弦楽的スケールの大曲。冒頭の打楽器のソロから全奏へ。終盤に向けてクライマックスを迎える。'},
+  {title:'暁の空へ〜希望の序曲',   difficulty:Math.max(2,Math.ceil(G.skill/20)-1), composer:'星野 幻想',
+   ...pickJiyuTraits()[1],
+   desc:'夜明けをテーマにした叙情的な作品。木管の柔らかな旋律から始まり、全奏の輝かしいフィナーレで締めくくる。'}
+]
 };
 showKaDaiKyokuModal(G.kaDaiKyoku);
 }
@@ -1857,24 +2066,133 @@ const kadaiHtml=(data.kadai||[]).map(k=>`
 </div>
 <div style="font-size:11px;color:var(--ink2)">${k.desc}</div>
 </div>`).join('');
-const jiyuHtml=data.jiyu?`
-<div style="background:var(--gold3);border:1px solid rgba(176,125,42,.3);border-radius:8px;padding:12px;margin-top:8px">
-<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:4px">🎼 自由曲</div>
-<div style="font-family:var(--serif);font-size:15px;font-weight:800;margin-bottom:2px">${data.jiyu.title}</div>
-<div style="font-size:11px;color:var(--ink3);margin-bottom:6px">作曲：${data.jiyu.composer||'—'} ／ 難易度：${stars(data.jiyu.difficulty||3)}</div>
-<div style="font-size:11px;color:var(--ink2)">${data.jiyu.desc}</div>
-</div>`:'';
+const jiyuArr=Array.isArray(data.jiyu)?data.jiyu:(data.jiyu?[data.jiyu]:[]);
+const traitIconJ={dramatic:'🎭',technical:'⚡',lyrical:'🎵',rhythmic:'🥁',stamina:'💪',ensemble:'🎶',solo:'🎷',modern:'🔬'};
+const traitColJ ={dramatic:'var(--rose)',technical:'var(--red)',lyrical:'var(--teal)',rhythmic:'var(--amber)',stamina:'var(--green)',ensemble:'var(--blue)',solo:'var(--teal)',modern:'var(--rose)'};
+const jiyuHtml=jiyuArr.length?`
+<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px">🎼 自由曲（2曲から選択）</div>
+${jiyuArr.map((j,i)=>{
+  const col=traitColJ[j.trait]||'var(--gold)';
+  const w=j.scoreWeight||{skill:0.35,ensemble:0.30,song:0.25,morale:0.10};
+  const fit=Math.round(G.skill*(w.skill||0.35)+G.ensemble*(w.ensemble||0.30)+G.song*(w.song||0.25)+G.morale*(w.morale||0.10));
+  const fitLabel=fit>=75?'◎ 得意':fit>=60?'○ 合う':fit>=45?'△ やや難':'✗ 苦手';
+  const fitCol=fit>=75?'var(--green)':fit>=60?'var(--teal)':fit>=45?'var(--amber)':'var(--red)';
+  return `<div style="background:var(--gold3);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .15s"
+    onclick="selectJiyu(${i})" id="jiyu-opt-${i}"
+    onmouseover="this.style.borderColor='${col}'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px">
+      <div>
+        <div style="font-family:var(--serif);font-size:14px;font-weight:800">${j.title}</div>
+        <div style="font-size:10px;color:var(--ink3)">作曲：${j.composer||'—'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;color:var(--gold)">${stars(j.difficulty||3)}</div>
+        <div style="font-size:11px;color:${fitCol};font-weight:700">${fitLabel}（${fit}点）</div>
+      </div>
+    </div>
+    <div style="display:inline-block;background:${col}22;border:1px solid ${col};border-radius:5px;padding:1px 7px;font-size:10px;font-weight:700;color:${col};margin-bottom:4px">
+      ${traitIconJ[j.trait]||'🎼'} ${j.traitLabel||''}
+    </div>
+    <div style="font-size:10px;color:var(--ink3);margin-bottom:3px">${j.traitDesc||''}</div>
+    <div style="font-size:11px;color:var(--ink2)">${j.desc}</div>
+  </div>`;
+}).join('')}`:'';
+// 課題曲選択UI生成
+const traitIcon={solo:'🎷',ensemble:'🎶',stamina:'💪',technical:'⚡'};
+const traitCol ={solo:'var(--teal)',ensemble:'var(--blue)',stamina:'var(--green)',technical:'var(--rose)'};
+const kadaiSelectHtml=(data.kadai||[]).map((k,i)=>{
+  const w=k.scoreWeight||{skill:0.35,ensemble:0.35,song:0.20,morale:0.10};
+  // 部の現状との相性を計算
+  const avgStamina=G.members.length?Math.round(G.members.reduce((a,m)=>a+m.stamina,0)/G.members.length):50;
+  const fit = Math.round(G.skill*w.skill + G.ensemble*w.ensemble + G.song*w.song + G.morale*w.morale
+    + (k.trait==='stamina' ? (avgStamina-50)*0.3 : 0));
+  const fitLabel = fit>=75?'◎ 得意':fit>=60?'○ 合う':fit>=45?'△ やや難':'✗ 苦手';
+  const fitCol   = fit>=75?'var(--green)':fit>=60?'var(--teal)':fit>=45?'var(--amber)':'var(--red)';
+  const diffStars='★'.repeat(k.difficulty||3)+'☆'.repeat(5-(k.difficulty||3));
+  const col=traitCol[k.trait]||'var(--ink3)';
+  return `<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .15s"
+    onclick="selectKadai(${i})" id="kadai-opt-${i}"
+    onmouseover="this.style.borderColor='${col}'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px">
+      <div>
+        <span style="font-size:10px;color:var(--ink3)">${k.number}</span>
+        <div style="font-family:var(--serif);font-size:14px;font-weight:700">${k.title}</div>
+        <div style="font-size:10px;color:var(--teal)">${k.style}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;color:var(--gold)">${diffStars}</div>
+        <div style="font-size:11px;color:${fitCol};font-weight:700">${fitLabel}（${fit}点）</div>
+      </div>
+    </div>
+    <div style="display:inline-block;background:${col}22;border:1px solid ${col};border-radius:5px;padding:1px 7px;font-size:10px;font-weight:700;color:${col};margin-bottom:4px">
+      ${traitIcon[k.trait]||'🎵'} ${k.traitLabel||''}
+    </div>
+    <div style="font-size:10px;color:var(--ink3);margin-bottom:3px">${k.traitDesc||''}</div>
+    <div style="font-size:11px;color:var(--ink2)">${k.desc}</div>
+  </div>`;
+}).join('');
 document.getElementById('comp-result-body').innerHTML=`
 <div style="text-align:left;padding:4px 0">
-<div style="font-family:var(--serif);font-size:18px;font-weight:800;margin-bottom:4px;text-align:center">🎼 今年の曲目決定</div>
-<div style="font-size:11px;color:var(--ink3);text-align:center;margin-bottom:12px">${G.year}年度 ${G.division==='large'?'大編成':'中編成'}</div>
-<div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px">課題曲（4曲から1曲選択）</div>
-${kadaiHtml}
+<div style="font-family:var(--serif);font-size:18px;font-weight:800;margin-bottom:4px;text-align:center">🎼 課題曲を選んでください</div>
+<div style="font-size:11px;color:var(--ink3);text-align:center;margin-bottom:12px">${G.year}年度 ／ 4曲から1曲を選択</div>
+${kadaiSelectHtml}
 ${jiyuHtml}
-<div style="margin-top:10px;font-size:11px;color:var(--ink3)">※練習を積んで難易度の高い課題曲に挑戦しましょう</div>
+<div style="margin-top:10px;font-size:10px;color:var(--ink3)">※「得意」な曲を選ぶとスコアに有利。難しい曲は成功すれば高評価。</div>
 </div>`;
 document.getElementById('ov-comp').classList.add('show');
-addLog(`課題曲・自由曲「${data.jiyu?.title||'—'}」が決定した。`,'システム');
+// 選択ボタンを非表示（選曲するまで閉じられない）
+const okBtn=document.querySelector('#ov-comp .btn');
+if(okBtn) okBtn.style.display='none';
+}
+function selectKadai(idx){
+const k=G.kaDaiKyoku.kadai[idx];
+if(!k) return;
+G.kaDaiKyoku.selectedKadai=k;
+// 選択したことを視覚的に反映
+document.querySelectorAll('[id^="kadai-opt-"]').forEach((el,i)=>{
+  el.style.opacity=i===idx?'1':'0.4';
+  el.style.borderColor=i===idx?'var(--gold)':'var(--border)';
+  if(i===idx) el.style.background='var(--gold3)';
+});
+// OKボタンを表示
+const okBtn=document.querySelector('#ov-comp .btn');
+if(okBtn){okBtn.style.display='';okBtn.textContent=`「${k.title}」で決定`;}
+addLog(`課題曲「${k.title}」（${k.traitLabel}）を選択した。`,'システム');
+notif('課題曲決定',`「${k.title}」を選択しました`);
+// 両方選択済みならOKボタンを有効化
+checkBothSelected();
+}
+function selectJiyu(idx){
+const jiyuArr=Array.isArray(G.kaDaiKyoku.jiyu)?G.kaDaiKyoku.jiyu:[G.kaDaiKyoku.jiyu];
+const j=jiyuArr[idx];
+if(!j) return;
+G.kaDaiKyoku.selectedJiyu=j;
+document.querySelectorAll('[id^="jiyu-opt-"]').forEach((el,i)=>{
+  el.style.opacity=i===idx?'1':'0.4';
+  el.style.borderColor=i===idx?'var(--gold)':'var(--border)';
+  if(i===idx) el.style.background='var(--gold3)';
+  else el.style.background='';
+});
+addLog(`自由曲「${j.title}」（${j.traitLabel}）を選択した。`,'システム');
+notif('自由曲決定',`「${j.title}」を選択しました`);
+checkBothSelected();
+}
+function checkBothSelected(){
+const kadaiOk=!!G.kaDaiKyoku?.selectedKadai;
+const jiyuOk=!!G.kaDaiKyoku?.selectedJiyu;
+const okBtn=document.querySelector('#ov-comp .btn');
+if(!okBtn) return;
+if(kadaiOk&&jiyuOk){
+  const k=G.kaDaiKyoku.selectedKadai;
+  const j=G.kaDaiKyoku.selectedJiyu;
+  okBtn.style.display='';
+  okBtn.textContent=`「${k.title}」×「${j.title}」で決定`;
+} else if(kadaiOk){
+  okBtn.style.display='';
+  okBtn.textContent='自由曲も選んでください';
+  okBtn.disabled=true;
+  setTimeout(()=>{if(okBtn)okBtn.disabled=false;},100);
+}
 }
 function openDivisionModal(){
 const cnt=G.members.length;
@@ -2013,6 +2331,100 @@ recalc(); renderAll();
 function checkAchievements(){
 if(G.members.length>=50) G.achievements.members50=true;
 if(G.skill>=80)          G.achievements.skill80=true;
+}
+
+// ================================================================
+// セーブ・ロード機能
+// ================================================================
+const SAVE_KEY='suisougaku_save';
+const SAVE_SLOTS=3;
+
+function getSaveSlots(){
+  const slots=[];
+  for(let i=0;i<SAVE_SLOTS;i++){
+    const raw=localStorage.getItem(SAVE_KEY+'_'+i);
+    slots.push(raw?JSON.parse(raw):null);
+  }
+  return slots;
+}
+
+function saveGame(slot){
+  const saveData={
+    version:1,
+    savedAt:new Date().toLocaleString('ja-JP'),
+    school:G.school, year:G.year, month:G.month, week:G.week,
+    diff:G.diff, division:G.division, divisionChosen:G.divisionChosen,
+    skill:G.skill, ensemble:G.ensemble, song:G.song, morale:G.morale,
+    funds:G.funds, dues:G.dues, parentAnger:G.parentAnger,
+    members:G.members, captain:G.captain, execs:G.execs,
+    advisor:G.advisor, kaDaiKyoku:G.kaDaiKyoku,
+    compSchedule:G.compSchedule, compHistory:G.compHistory,
+    achievements:G.achievements, pracHistory:G.pracHistory,
+    songBoredom:G.songBoredom, sectionalDebt:G.sectionalDebt,
+    conflictActive:G.conflictActive, shirkerIds:G.shirkerIds,
+    log:(G.log||[]).slice(-50), // 直近50件のみ保存
+  };
+  localStorage.setItem(SAVE_KEY+'_'+slot, JSON.stringify(saveData));
+  notif('セーブ完了',`スロット${slot+1}に保存しました（${saveData.savedAt}）`);
+  renderSaveModal();
+}
+
+function loadGame(slot){
+  const raw=localStorage.getItem(SAVE_KEY+'_'+slot);
+  if(!raw){notif('エラー','セーブデータがありません');return;}
+  const d=JSON.parse(raw);
+  Object.assign(G,{
+    school:d.school, year:d.year, month:d.month, week:d.week,
+    diff:d.diff, division:d.division, divisionChosen:d.divisionChosen,
+    skill:d.skill, ensemble:d.ensemble, song:d.song, morale:d.morale,
+    funds:d.funds, dues:d.dues, parentAnger:d.parentAnger||0,
+    members:d.members, captain:d.captain, execs:d.execs||[],
+    advisor:d.advisor, kaDaiKyoku:d.kaDaiKyoku,
+    compSchedule:d.compSchedule||[], compHistory:d.compHistory||[],
+    achievements:d.achievements||{}, pracHistory:d.pracHistory||[],
+    songBoredom:d.songBoredom||0, sectionalDebt:d.sectionalDebt||0,
+    conflictActive:d.conflictActive||false, shirkerIds:d.shirkerIds||[],
+    log:d.log||[],
+  });
+  closeModal('ov-save');
+  showView('v-game');
+  showScr('overview',null);
+  recalc();
+  renderAll();
+  notif('ロード完了',`${d.school} ${d.year}年目をロードしました`);
+}
+
+function deleteSave(slot){
+  localStorage.removeItem(SAVE_KEY+'_'+slot);
+  notif('削除完了',`スロット${slot+1}のデータを削除しました`);
+  renderSaveModal();
+}
+
+function renderSaveModal(){
+  const slots=getSaveSlots();
+  const inGame=document.getElementById('v-game').classList.contains('active');
+  document.getElementById('save-slots').innerHTML=slots.map((s,i)=>`
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:700;font-size:13px">スロット ${i+1}</div>
+        <div style="display:flex;gap:6px">
+          ${inGame?`<button class="btn btn-sm btn-gold" onclick="saveGame(${i})">上書き保存</button>`:''}
+          ${s?`<button class="btn btn-sm" onclick="loadGame(${i})">ロード</button>`:''}
+          ${s?`<button class="btn btn-sm" style="color:var(--red)" onclick="deleteSave(${i})">削除</button>`:''}
+        </div>
+      </div>
+      ${s?`
+        <div style="font-size:12px;color:var(--ink2)">${s.school}　${s.year}年目 ${s.month}月</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:2px">技術:${s.skill} 士気:${s.morale} 資金:${(s.funds||0).toLocaleString()}円</div>
+        <div style="font-size:10px;color:var(--ink4);margin-top:2px">保存日時：${s.savedAt}</div>
+      `:`<div style="font-size:12px;color:var(--ink4)">データなし</div>`}
+    </div>
+  `).join('');
+}
+
+function openSaveModal(){
+  renderSaveModal();
+  document.getElementById('ov-save').classList.add('show');
 }
 function showView(id){
 document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
