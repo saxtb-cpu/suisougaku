@@ -43,7 +43,98 @@ const ADV_F=['田村 あき子','高木 由美','中森 信子','佐伯 美奈',
 const ADV_M=['中谷 敏行','岡野 俊介','三浦 勇気','吉川 誠二','黒岩 一郎','石橋 健','磯部 義夫','河合 稔','堀田 雅彦','宮田 良平'];
 const SCH_PFX=['桜丘','緑陵','北星','南風','東明','西陽','青空','白鷹','若葉','光陵','翠嶺','朱雀','玄武','蒼龍','鳳凰','月見野','星ヶ丘','夕映え','黎明','旭川','梅が丘','桐林','瑞穂','銀河','曙'];
 const SCH_SFX=['高校','第一高校','附属高校','学園高校','中学校'];
-const SCH_FEAT=['強豪OB多数','専用練習棟あり','楽器設備充実','保護者会が活発','顧問の指導実績豊富','地域密着型','コンクール常連','歴史ある部活'];
+const SCH_FEAT=['強豪OB多数','専用練習棟あり','楽器設備充実','保護者会が活発','顧問の指導実績豊富','地域密着型','コンクール常連','歴史ある部活','音楽科設置','合宿施設完備','外部講師招聘実績','地区No.1の音響設備'];
+
+// 特徴ごとのボーナス定義
+const FEAT_BONUS={
+  '強豪OB多数':{
+    label:'強豪OB多数',
+    desc:'OBのネットワークが豊富。技術指導や精神的サポートが充実。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+3,99); m.potential=Math.min(m.potential+5,99); },
+    weeklyFx:   g=>{ if(Math.random()<0.12) applyAll(g,{skill:1,morale:2}); }, // 月1回程度OBからアドバイス
+    fundBonus:  0,
+  },
+  '専用練習棟あり':{
+    label:'専用練習棟あり',
+    desc:'いつでも使える練習環境がある。スタミナの回復が早い。',
+    memberBonus: m=>{ m.stamina=Math.min(m.stamina+5,99); },
+    weeklyFx:   g=>{ g.members.forEach(m=>m.stamina=Math.min(99,m.stamina+1)); },
+    fundBonus:  0,
+  },
+  '楽器設備充実':{
+    label:'楽器設備充実',
+    desc:'質の高い楽器が揃っている。演奏力・表現力の初期値が高い。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+4,99); m.expression=Math.min(m.expression+3,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+  },
+  '保護者会が活発':{
+    label:'保護者会が活発',
+    desc:'保護者のサポートが手厚い。資金面と士気が安定しやすい。',
+    memberBonus: m=>{ m.morale=Math.min(m.morale+4,99); },
+    weeklyFx:   null,
+    fundBonus:  15000, // 毎月の追加補助
+  },
+  '顧問の指導実績豊富':{
+    label:'顧問の指導実績豊富',
+    desc:'経験豊富な顧問。練習効果が全体的に高まる。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+2,99); m.expression=Math.min(m.expression+2,99); },
+    weeklyFx:   g=>{ if(Math.random()<0.15) applyAll(g,{skill:1,ens:1}); },
+    fundBonus:  0,
+  },
+  '地域密着型':{
+    label:'地域密着型',
+    desc:'地域からの支援が厚い。演奏機会が多く本番慣れしやすい。',
+    memberBonus: m=>{ m.morale=Math.min(m.morale+3,99); m.stamina=Math.min(m.stamina+2,99); },
+    weeklyFx:   null,
+    fundBonus:  8000,
+  },
+  'コンクール常連':{
+    label:'コンクール常連',
+    desc:'コンクールの空気感を知っている。本番のスコアにボーナス。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+3,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+    compBonus:  4, // コンクールスコアに加算
+  },
+  '歴史ある部活':{
+    label:'歴史ある部活',
+    desc:'長年の伝統が部員の誇りになっている。士気と潜在力が高い。',
+    memberBonus: m=>{ m.morale=Math.min(m.morale+5,99); m.potential=Math.min(m.potential+3,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+  },
+  '音楽科設置':{
+    label:'音楽科設置',
+    desc:'音楽専門の授業がある。技術・表現力の成長が速い。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+3,99); m.expression=Math.min(m.expression+4,99); m.potential=Math.min(m.potential+4,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+  },
+  '合宿施設完備':{
+    label:'合宿施設完備',
+    desc:'合宿がいつでも実施可能。夏合宿の効果が大幅アップ。',
+    memberBonus: m=>{ m.stamina=Math.min(m.stamina+4,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+    campBonus:  true, // 夏合宿の効果1.5倍
+  },
+  '外部講師招聘実績':{
+    label:'外部講師招聘実績',
+    desc:'プロ講師のコネクションがある。外部講師の費用が割安。',
+    memberBonus: m=>{ m.skill=Math.min(m.skill+2,99); },
+    weeklyFx:   null,
+    fundBonus:  0,
+    teacherDiscount: 15000, // 外部講師費用の割引
+  },
+  '地区No.1の音響設備':{
+    label:'地区No.1の音響設備',
+    desc:'最高の音響環境で練習できる。アンサンブルと表現力が伸びやすい。',
+    memberBonus: m=>{ m.expression=Math.min(m.expression+5,99); },
+    weeklyFx:   g=>{ if(Math.random()<0.1) applyAll(g,{ens:1,morale:1}); },
+    fundBonus:  0,
+  },
+};
 const PARTS=['フルート','クラリネット','サックス','トランペット','トロンボーン','ホルン','チューバ','打楽器','オーボエ'];
 
 // 自由曲の特性プール（毎年2つランダム選択）
@@ -594,12 +685,43 @@ pracHistory:[],          // 直近の練習タグ履歴（さぼり判定用）
 shirkerIds:[],           // 現在さぼっている部員ID
 songBoredom:0,           // 曲練習連続カウント（マンネリ）
 sectionalDebt:0,         // パート練習不足カウント
+feats:schoolData.feats||[], // 学校の特徴
 };
+// 学校特徴ボーナスを部員に適用
+(G.feats||[]).forEach(feat=>{
+  const b=FEAT_BONUS[feat];
+  if(b&&b.memberBonus) G.members.forEach(m=>b.memberBonus(m));
+});
+// 特徴をログに記録
+if(G.feats.length>0){
+  const featDescs=G.feats.map(f=>FEAT_BONUS[f]?`【${f}】${FEAT_BONUS[f].desc}`:`【${f}】`).join(' ／ ');
+  addLog(`学校特徴：${featDescs}`,'システム');
+}
 recalc();
 autoElectCaptain();
 showView('v-intro');
 document.getElementById('intro-name').textContent=G.school+'吹奏楽部';
 document.getElementById('intro-sub').textContent=`顧問：${G.advisor} ／ 部員数：${members.length}名 ／ ${DIFF[G.diff].label}`;
+// 特徴ボーナス説明を表示
+const featBonusEl=document.getElementById('intro-feat-bonus');
+if(featBonusEl&&G.feats.length>0){
+  featBonusEl.innerHTML=G.feats.map(f=>{
+    const b=FEAT_BONUS[f];
+    if(!b) return '';
+    const bonuses=[];
+    if(b.memberBonus) bonuses.push('部員の初期ステータス↑');
+    if(b.weeklyFx)    bonuses.push('毎週効果あり');
+    if(b.fundBonus>0) bonuses.push(`月+${b.fundBonus.toLocaleString()}円`);
+    if(b.compBonus)   bonuses.push(`コンクール+${b.compBonus}点`);
+    if(b.campBonus)   bonuses.push('合宿効果1.5倍');
+    if(b.teacherDiscount) bonuses.push(`外部講師${b.teacherDiscount.toLocaleString()}円割引`);
+    return `<div style="background:var(--gold3);border:1px solid rgba(176,125,42,.25);border-radius:7px;padding:7px 10px;margin-bottom:5px;font-size:11px">
+      <span style="font-weight:700;color:var(--gold)">✦ ${f}</span>
+      <span style="color:var(--ink3);margin-left:6px">${b.desc}</span>
+      <div style="color:var(--teal);margin-top:2px;font-size:10px">ボーナス：${bonuses.join(' ／ ')}</div>
+    </div>`;
+  }).join('');
+}
 const grid=document.getElementById('member-grid');
 grid.innerHTML='';
 members.forEach((m,i)=>{
@@ -879,7 +1001,262 @@ document.getElementById('prof-personality-box').innerHTML=
 <strong>得意：</strong>${m.strength}<br>
 <strong>苦手：</strong>${m.weakness}<br>
 <strong>趣味：</strong>${m.hobby}`;
+// 相談エリア：士気が低い場合に表示
+renderConsultArea(m);
 document.getElementById('ov-profile').classList.add('show');
+}
+
+function renderConsultArea(m){
+const el=document.getElementById('prof-consult-area');
+if(!el) return;
+if(m.morale<=50){
+  const urgency = m.morale<=25 ? 'critical' : m.morale<=40 ? 'serious' : 'mild';
+  const urgencyMsg = urgency==='critical'
+    ? `<span style="color:var(--red);font-weight:700">⚠ 士気危険（${m.morale}）——早急なケアが必要です</span>`
+    : urgency==='serious'
+    ? `<span style="color:var(--amber);font-weight:700">😔 士気低下（${m.morale}）——声をかけてみましょう</span>`
+    : `<span style="color:var(--ink3)">士気がやや低め（${m.morale}）——フォローできます</span>`;
+  el.innerHTML=`
+    <div style="background:var(--red2);border:1px solid rgba(192,64,64,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:11px;margin-bottom:8px">${urgencyMsg}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-gold" onclick="openConsult(${m.id},'peer')">👥 部員同士で相談</button>
+        <button class="btn btn-sm" onclick="openConsult(${m.id},'teacher')">🎓 顧問に相談する</button>
+      </div>
+    </div>`;
+} else {
+  el.innerHTML='';
+}
+}
+
+// ================================================================
+// 相談システム
+// ================================================================
+let _consultTargetId=null;
+
+function openConsult(memberId, type){
+  _consultTargetId=memberId;
+  const m=G.members.find(x=>x.id===memberId);
+  if(!m) return;
+
+  document.getElementById('consult-title').textContent=
+    type==='peer' ? '👥 部員同士で相談' : '🎓 顧問に相談する';
+  document.getElementById('consult-subtitle').textContent=
+    `${m.name}（士気：${m.morale}）の悩みに向き合います`;
+  document.getElementById('consult-result').style.display='none';
+
+  if(type==='peer'){
+    // 相談相手の候補（士気高め・性格が合いそうな部員）
+    const candidates = G.members.filter(x=>
+      x.id!==memberId && x.morale>=55 &&
+      ['ムードメーカー','リーダーシップ型','努力家','熱血漢'].includes(x.personality)
+    );
+    const samePart = G.members.filter(x=>x.id!==memberId&&x.part===m.part&&x.morale>=50);
+    const options = [...new Set([...candidates,...samePart])].slice(0,4);
+    const cap_ = G.captain;
+
+    let html=`<div style="font-size:12px;color:var(--ink2);margin-bottom:10px">誰に話を聞いてもらいますか？</div>`;
+    if(cap_&&cap_.id!==memberId&&cap_.morale>=45){
+      html+=peerOption(cap_,m,'captain');
+    }
+    if(options.length===0){
+      html+=`<div style="font-size:12px;color:var(--ink3);padding:12px;text-align:center">今は相談できる部員がいません（他の部員の士気も低いようです）</div>`;
+    } else {
+      options.forEach(p=>{ html+=peerOption(p,m,'peer'); });
+    }
+    document.getElementById('consult-body').innerHTML=html;
+
+  } else {
+    // 顧問相談
+    const advisorMorale = G.morale; // 部全体の士気を顧問の状態として使用
+    const approaches=[
+      {key:'listen',   label:'💬 じっくり話を聞く',    desc:'時間をかけて気持ちを受け止める。効果は確実だが士気回復は中程度。'},
+      {key:'encourage',label:'🔥 熱く励ます',          desc:'顧問が情熱的に背中を押す。ハマれば大きな効果、空回りすることも。'},
+      {key:'practice', label:'🎵 一緒に練習する',       desc:'言葉よりも音楽で向き合う。スキルと士気を同時に上げる可能性がある。'},
+      {key:'rest',     label:'🌿 少し休ませる',         desc:'無理をさせない判断。士気は回復するが、練習から外れる分スキルが落ちる。'},
+    ];
+    document.getElementById('consult-body').innerHTML=
+      `<div style="font-size:12px;color:var(--ink2);margin-bottom:10px">${G.advisor}先生の対応を選んでください</div>`+
+      approaches.map(a=>`
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s"
+          onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'"
+          onclick="resolveTeacherConsult(${memberId},'${a.key}')">
+          <div style="font-size:12px;font-weight:700;margin-bottom:2px">${a.label}</div>
+          <div style="font-size:10px;color:var(--ink3)">${a.desc}</div>
+        </div>`).join('');
+  }
+  document.getElementById('ov-consult').classList.add('show');
+}
+
+function peerOption(peer, target, role){
+  const chemistry = calcChemistry(peer, target);
+  const chemLabel = chemistry>=0.7?'◎ 相性よさそう':chemistry>=0.4?'○ 話せそう':'△ 少し難しいかも';
+  const chemCol   = chemistry>=0.7?'var(--green)':chemistry>=0.4?'var(--teal)':'var(--amber)';
+  return `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s"
+      onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"
+      onclick="resolvePeerConsult(${peer.id},${target.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <span style="font-size:12px;font-weight:700">${role==='captain'?'👑 ':''} ${peer.name}</span>
+          <span style="font-size:10px;color:var(--ink3);margin-left:6px">${peer.part}・${peer.grade}年・${peer.personality}</span>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${chemCol}">${chemLabel}</span>
+      </div>
+    </div>`;
+}
+
+function calcChemistry(a, b){
+  // 性格の相性を数値化
+  const good={
+    'ムードメーカー':['繊細なアーティスト','人見知り','おっとり型'],
+    'リーダーシップ型':['努力家','完璧主義者'],
+    '努力家':['繊細なアーティスト','おっとり型'],
+    '熱血漢':['お調子者','自由奔放'],
+  };
+  const bad={
+    '完璧主義者':['お調子者','自由奔放'],
+    '自由奔放':['完璧主義者'],
+  };
+  let score=0.5;
+  if(good[a.personality]?.includes(b.personality)) score+=0.3;
+  if(bad[a.personality]?.includes(b.personality))  score-=0.2;
+  if(a.part===b.part) score+=0.1; // 同パートは話しやすい
+  if(a.grade > b.grade) score+=0.05; // 先輩の方が頼りやすい
+  return Math.max(0,Math.min(1,score));
+}
+
+function resolvePeerConsult(peerId, targetId){
+  const peer   = G.members.find(m=>m.id===peerId);
+  const target = G.members.find(m=>m.id===targetId);
+  if(!peer||!target) return;
+
+  const chemistry = calcChemistry(peer, target);
+  const roll = Math.random();
+  let result, moraleGain, ensGain=0;
+
+  if(roll < chemistry * 0.8){
+    // 成功：相性と運次第で効果が変わる
+    moraleGain = Math.round(rnd(8,18) * chemistry);
+    ensGain    = Math.round(rnd(2,6)  * chemistry);
+    result='success';
+  } else if(roll < 0.9){
+    moraleGain = rnd(2,6);
+    result='partial';
+  } else {
+    moraleGain = rnd(-3,1);
+    result='fail';
+  }
+
+  target.morale = cap(target.morale + moraleGain);
+  if(ensGain>0){ target.expression=cap(target.expression+ensGain); peer.expression=cap(peer.expression+2); }
+  // 相談した側も少し士気が変化
+  peer.morale = cap(peer.morale + (result==='success'?rnd(2,5):-1));
+
+  const msgs={
+    success:[
+      `${peer.name}が${target.name}の話をじっくり聞いた。話し終えた${target.name}の表情が、少し明るくなった。`,
+      `「なんか、話してよかった」——${target.name}がぽつりと言った。${peer.name}は笑って頷いた。`,
+      `${peer.name}の言葉が、${target.name}の心に届いた。二人の間に、新しい絆が生まれた気がした。`,
+    ],
+    partial:[
+      `${peer.name}なりに言葉をかけたが、${target.name}の表情はまだ晴れない。でも、声をかけてもらえたことは伝わったようだ。`,
+      `うまく言葉が見つからなかった。それでも、隣にいてくれることが、少しだけ助けになった。`,
+    ],
+    fail:[
+      `話しかけるタイミングが合わなかった。${target.name}は「大丈夫」と言ったが、顔は曇ったままだった。`,
+      `${peer.name}の励ましが、今日は${target.name}に届かなかった。距離感が難しい。`,
+    ],
+  };
+
+  showConsultResult(
+    result==='success'?'✅ 心が少し軽くなった':result==='partial'?'💬 少し話せた':'😔 うまく届かなかった',
+    pick(msgs[result]),
+    `士気 ${moraleGain>=0?'+':''}${moraleGain}${ensGain>0?' / 表現力 +'+ensGain:''}`,
+    result
+  );
+  recalc(); renderAll();
+  addLog(`${target.name}が${peer.name}に相談（${result==='success'?'うまく伝わった':result==='partial'?'少し伝わった':'届かなかった'}）`,'部員管理');
+}
+
+function resolveTeacherConsult(memberId, approach){
+  const m=G.members.find(x=>x.id===memberId);
+  if(!m) return;
+
+  const pers=m.personality;
+  let moraleGain=0, skillChange=0, resultKey;
+
+  const roll=Math.random();
+  if(approach==='listen'){
+    moraleGain=rnd(10,20);
+    resultKey='success';
+  } else if(approach==='encourage'){
+    const fits=['熱血漢','努力家','リーダーシップ型','お調子者'];
+    const misfit=['繊細なアーティスト','人見知り','おっとり型'];
+    if(fits.includes(pers)||roll<0.5){ moraleGain=rnd(15,28); resultKey='success'; }
+    else if(misfit.includes(pers)&&roll>0.6){ moraleGain=rnd(-5,3); resultKey='fail'; }
+    else { moraleGain=rnd(5,12); resultKey='partial'; }
+  } else if(approach==='practice'){
+    moraleGain=rnd(8,16);
+    skillChange=rnd(2,5);
+    resultKey='success';
+  } else { // rest
+    moraleGain=rnd(12,22);
+    skillChange=-rnd(1,3);
+    resultKey='partial';
+  }
+
+  m.morale=cap(m.morale+moraleGain);
+  if(skillChange) m.skill=cap(m.skill+skillChange);
+
+  const approachMsgs={
+    listen:{
+      success:[`${G.advisor}先生はじっくり話を聞いてくれた。「あなたのこと、ちゃんと見てるよ」——その言葉が、${m.name}の心をほぐした。`,
+               `${m.name}が話し終えるまで、${G.advisor}先生は一度も口を挟まなかった。それだけで、十分だった。`],
+      partial:[`${G.advisor}先生が話を聞いてくれた。完全には伝わらなかったかもしれないが、少しだけ楽になった。`],
+      fail:   [`${G.advisor}先生に話したが、うまく言葉にできなかった。それでも、聞こうとしてくれたことは伝わった。`],
+    },
+    encourage:{
+      success:[`${G.advisor}先生の熱い言葉が、${m.name}の中で何かに火をつけた。「やってやろう」——そんな気持ちが芽生えた。`,
+               `「お前なら絶対できる」——${G.advisor}先生の言葉を、${m.name}はしばらく胸の中で繰り返していた。`],
+      partial:[`${G.advisor}先生の励ましを、${m.name}は半分受け取った。もう少し時間が必要かもしれない。`],
+      fail:   [`${G.advisor}先生の言葉は熱かったが、今の${m.name}には少し重すぎた。タイミングが難しかった。`],
+    },
+    practice:{
+      success:[`${G.advisor}先生と二人で練習した。言葉よりも音楽が、${m.name}の気持ちを動かした。`,
+               `一緒に音を出すことで、余計なことを考えずに済んだ。${m.name}の音が、少しずつ戻ってきた。`],
+      partial:[`${G.advisor}先生と練習した。気分転換にはなったが、根本的な悩みはまだ残っている。`],
+      fail:   [`練習に集中しようとしたが、気持ちがついてこなかった。でも、先生が付き合ってくれたことは嬉しかった。`],
+    },
+    rest:{
+      success:[`「少し休んでいいよ」——${G.advisor}先生の一言が、${m.name}をほっとさせた。無理をしないことも、大切な判断だ。`,
+               `${m.name}は少し練習から離れた。体を休めながら、気持ちを整える時間ができた。`],
+      partial:[`休む時間をもらった${m.name}。気持ちは少し楽になったが、練習から外れた分の不安も残った。`],
+      fail:   [`休ませてもらったが、逆に焦りが出てきてしまった。${m.name}には、動いている方が合っているのかもしれない。`],
+    },
+  };
+
+  const msgs=approachMsgs[approach][resultKey]||approachMsgs[approach].partial;
+  const label=approach==='listen'?'じっくり話を聞く':approach==='encourage'?'熱く励ます':approach==='practice'?'一緒に練習':' 少し休ませる';
+  showConsultResult(
+    resultKey==='success'?`✅ ${label}：効果あり`:resultKey==='partial'?`💬 ${label}：少し効果あり`:`😔 ${label}：うまくいかなかった`,
+    pick(msgs),
+    `士気 ${moraleGain>=0?'+':''}${moraleGain}${skillChange?' / 演奏力 '+(skillChange>=0?'+':'')+skillChange:''}`,
+    resultKey
+  );
+  recalc(); renderAll();
+  addLog(`${G.advisor}先生が${m.name}に相談対応（${label}→${resultKey==='success'?'効果あり':'効果小'}）`,'部員管理');
+}
+
+function showConsultResult(title, body, effect, resultKey){
+  const col = resultKey==='success'?'var(--green)':resultKey==='partial'?'var(--amber)':'var(--red)';
+  const resultEl=document.getElementById('consult-result');
+  resultEl.style.display='block';
+  resultEl.innerHTML=`
+    <div style="font-weight:700;color:${col};margin-bottom:6px">${title}</div>
+    <div style="margin-bottom:8px">${body}</div>
+    <div style="font-size:10px;color:var(--ink3)">効果：${effect}</div>`;
+  document.getElementById('consult-body').innerHTML='';
 }
 function renderSchedule(){
 const months=[4,5,6,7,8,9,10,11,12,1,2,3];
@@ -1089,6 +1466,11 @@ ${warnings.map(w=>`<div style="color:var(--amber);font-size:10px;margin-top:2px"
 }
 function advanceWeek(){
 recalc();
+// 学校特徴の週次効果
+(G.feats||[]).forEach(feat=>{
+  const b=FEAT_BONUS[feat];
+  if(b&&b.weeklyFx) b.weeklyFx(G);
+});
 // 士気伝染チェック（練習前に適用）
 const contagion = applyMoraleContagion();
 const before={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds};
@@ -1115,8 +1497,14 @@ if(contagion && !eventData){
 }
 if(selPracId){
 const p=PRACTICES.find(x=>x.id===selPracId);
-if(p.cost&&G.funds<p.cost){notif('資金不足','外部講師を招く資金が不足しています');return;}
-G.funds-=p.cost;
+let pCost=p.cost;
+if(p.tag==='teacher'){
+  const discount=(G.feats||[]).reduce((s,f)=>{const b=FEAT_BONUS[f];return s+(b&&b.teacherDiscount?b.teacherDiscount:0);},0);
+  pCost=Math.max(0,p.cost-discount);
+  if(discount>0) notif('特徴ボーナス',`外部講師招聘費 ${discount.toLocaleString()}円割引！`);
+}
+if(pCost&&G.funds<pCost){notif('資金不足','外部講師を招く資金が不足しています');return;}
+G.funds-=pCost;
 const effectiveFx=getPracticeEffective(p);
 G._currentPracTag = p.tag||p.id; // パート練習判定用
 applyPracticeToMembers(effectiveFx);
@@ -1303,75 +1691,187 @@ return data.content.map(b=>b.text||'').join('').trim();
 function buildFallbackStory(week,pracName,eventData,before,after){
 const skillDelta=after.skill-before.skill;
 const moraleDelta=after.morale-before.morale;
-const fundsDelta=after.funds-before.funds;
+const pracTag=G._currentPracTag||'';
 const mem=G.members.length>0?pick(G.members):null;
 const mem2=G.members.length>1?pick(G.members.filter(m=>!mem||m.id!==mem.id)):null;
 const cap_=G.captain;
 const lowMorale=G.members.filter(m=>m.morale<40);
 const highMorale=G.members.filter(m=>m.morale>75);
 const lowSkill=G.members.filter(m=>m.skill<35);
+const highSkill=G.members.filter(m=>m.skill>70);
+const avgStamina=G.members.length?Math.round(G.members.reduce((a,m)=>a+m.stamina,0)/G.members.length):50;
 
-// 書き出しバリエーション
-const openings=[];
-if(cap_) openings.push(
+// ── 練習タグ別・特化した書き出し ──
+const pracOpenings={
+  basic:[
+    `チューニングの音が練習室に広がった。今週は基礎からじっくり向き合う一週間だった。`,
+    `ロングトーンの音が廊下まで響いた。地味だけど、これが全ての土台になる。`,
+    `音階練習から始まった今週。${mem?mem.name+'は':'部員たちは'}一音一音を丁寧に確かめるように吹いた。`,
+    `「基礎は嘘をつかない」——${G.advisor}先生の言葉が、練習室に静かに染み渡った。`,
+  ],
+  ensemble:[
+    `「全体、もう一度！」${G.advisor}先生の指揮棒が振り下ろされ、音が一体になっていく。`,
+    `バラバラだった音が、少しずつひとつに近づいていく感覚があった。`,
+    `合奏中、${mem?mem.name+'が':'誰かが'}隣のパートの音に耳を傾けているのが見えた。`,
+    `音が重なる瞬間の気持ちよさを、今週また少し感じることができた。`,
+  ],
+  song:[
+    `コンクール曲のフレーズが、今週も練習室に鳴り響いた。`,
+    `「本番まで何回弾けるか」——そんな緊張感が漂い始めた一週間だった。`,
+    `${G.kaDaiKyoku?.selectedKadai?'「'+G.kaDaiKyoku.selectedKadai.title+'」の':'課題曲の'}難しいパッセージと向き合い続けた一週間。`,
+    `譜面を見なくても弾けるようになってきた。でも、まだそれだけでは足りない。`,
+  ],
+  sectional:[
+    `パートごとに分かれた練習室から、それぞれの音が漏れ聞こえてきた。`,
+    `「ここのリズム、もう一回合わせよう」パート内の声が飛び交う一週間だった。`,
+    `${mem?mem.name+'の':'あるパートの'}音が、パート練習を重ねるごとに整ってきた。`,
+    `隣のパートの仕上がりが気になる。それがまた、いい刺激になっていた。`,
+  ],
+  sectional_sup:[
+    `${G.advisor}先生がパートを巡回する。視線が来るたびに、自然と姿勢が正される。`,
+    `「ここ、もう少し丁寧に」——${G.advisor}先生の一言が、各パートに緊張感をもたらした。`,
+    `先生が来るとわかっていると、普段より集中できる。複雑な気持ちだけれど。`,
+    `巡回の足音が聞こえるたびに、練習室の空気がぴりっとした。`,
+  ],
+  intense:[
+    `苦手なフレーズと、今週も正面から向き合った。`,
+    `${mem?mem.name+'は':'部員たちは'}できるまで繰り返した。10回、20回、それ以上。`,
+    `個人練習の時間、練習室は静かな緊張感に包まれていた。`,
+    `「できない」を「できる」に変えるために、ひたすら繰り返す一週間だった。`,
+  ],
+  teacher:[
+    `外部の先生が来た瞬間、練習室の空気が変わった。`,
+    `プロの耳には、どんな細かいミスも聞こえていた。`,
+    `「そこ、もっと息を使って」——普段とは違う言葉が、新しい気づきをくれた。`,
+    `外部講師の先生の一言一言が、部員たちの表情を変えていった。`,
+  ],
+  mental:[
+    `今週は楽器を置いて、気持ちを整える時間にした。`,
+    `「技術じゃなくて、心の話をしよう」——${G.advisor}先生の言葉で練習が始まった。`,
+    `円になって話し合った。音楽以外の話も、自然と出てきた。`,
+    `本番のことを想像しながら、部員たちは自分の気持ちと向き合った。`,
+  ],
+  recording:[
+    `スマホのマイクを立て、演奏を録音した。再生ボタンを押した瞬間、部員の顔が変わった。`,
+    `「思ったより…」録音を聴いた${mem?mem.name+'が':'誰かが'}、小さく呟いた。`,
+    `客観的に聴くと、見えなかったものが見えてくる。録音はそういう鏡だった。`,
+    `録音した音源を全員で聴いた。気まずい沈黙の後、自然と話し合いが始まった。`,
+  ],
+  analysis:[
+    `他校の演奏動画を全員で観た。「うまい」という声が自然と漏れた。`,
+    `ライバル校の音を聴いていると、自分たちの課題がはっきり見えてくる。`,
+    `「負けたくない」——分析が終わった後、${mem?mem.name+'の':'誰かの'}目に火が灯った。`,
+    `他校の演奏を研究することで、自分たちの強みと弱みが浮かび上がってきた。`,
+  ],
+  concert:[
+    `ステージに立つと、練習とは違う緊張感があった。でも、それが心地よかった。`,
+    `観客の前で演奏する。それだけで、部員の顔つきが変わる。`,
+    `拍手をもらうたびに、また頑張ろうという気持ちが湧いてきた。`,
+    `演奏が終わった後の静寂。そして、あたたかい拍手。${mem?mem.name+'には、':'部員たちには、'}その音が忘れられなかった。`,
+  ],
+};
+
+// ── 共通書き出し（タグ不明時のフォールバック）──
+const commonOpenings=[];
+if(cap_) commonOpenings.push(
   `${cap_.name}が「集合！」と声をかけ、今日も練習が始まった。`,
-  `「もう一回やろう」${cap_.name}が振り返ると、部員たちが自然と姿勢を正した。`,
-  `${G.advisor}先生がタクトを握り締め、静かに前を向いた。`,
   `部長の${cap_.name}が部員たちを見渡し、小さく頷いた。`
 );
-openings.push(
+commonOpenings.push(
   `放課後の練習室に、楽器の音が溢れ出した。`,
-  `${G.advisor}先生の「はい、止めて」という声が何度も飛んだ。`,
-  `今週も部員たちは音楽室に集まり、音を重ねていった。`,
-  `窓の外が暗くなっても、${G.school}吹奏楽部の練習は続いた。`
-);
-openings.push(
   `${G.advisor}先生の指揮棒が上がった瞬間、部員たちの視線が一点に集まった。`,
-  `「もう一度！」${G.advisor}先生の声が飛ぶたびに、音楽室の空気が引き締まる。`,
-  `${G.advisor}先生がタクトを振り下ろすと、重なった音が一気に広がった。`
+  `窓の外が暗くなっても、${G.school}吹奏楽部の練習は続いた。`,
+  `今週も部員たちは音楽室に集まり、音を重ねていった。`
 );
-if(mem) openings.push(
-  `${mem.name}が楽器を構えたとき、ふと去年のことを思い出した。`,
-  `${mem.name}の音が、今日は少し違って聴こえた。`
+if(mem) commonOpenings.push(
+  `${mem.name}の音が、今日は少し違って聴こえた。`,
+  `${mem.name}が楽器を構えたとき、ふと去年のことを思い出した。`
 );
+const openings=pracOpenings[pracTag]||commonOpenings;
 
-// 練習描写バリエーション
-const practiceDescs=[];
-if(pracName) practiceDescs.push(
-  `今週は${pracName}に集中した。`,
-  `${pracName}の練習が続く中、少しずつ音が揃ってきた。`,
-  `${G.advisor}先生の指示で、今日も${pracName}を繰り返した。`,
-  `「${pracName}をもう一度」——その言葉が、今週何度飛んだだろう。`
-);
-
-// 部員描写バリエーション
-const memberDescs=[];
-if(mem) memberDescs.push(
+// ── 練習タグ別・中間描写 ──
+const pracMidDescs={
+  basic:[
+    `スケールを何度も繰り返すうちに、${mem?mem.name+'の':'誰かの'}音が少し丸くなってきた。`,
+    `地道な基礎練習が、じわじわと土台を固めていく。すぐには見えないけれど、確かに積み上がっている。`,
+    `${lowSkill.length>0?pick(lowSkill).name+'は':mem?mem.name+'は':''}音階をゆっくり、丁寧に繰り返した。急がなくていい。今はそれだけでいい。`,
+  ],
+  ensemble:[
+    `${mem?mem.name+'が':''} 隣のパートの音を聴きながら自分の音を調整する。その積み重ねが、合奏を作っていく。`,
+    `バランスが揃った瞬間、${G.advisor}先生が小さく微笑んだ。部員たちはその表情を見逃さなかった。`,
+    `${mem&&mem2?mem.name+'と'+mem2.name+'が':'部員たちが'}アイコンタクトで音を合わせた。言葉はいらなかった。`,
+  ],
+  song:[
+    `${highSkill.length>0?pick(highSkill).name+'の':''}音が曲の核になっていく感覚があった。でも、まだ全員がそこに届いていない。`,
+    `難しいパッセージを${mem?mem.name+'が':''}何度も繰り返した。指が覚えるまで、ひたすら繰り返す。`,
+    `曲の後半、${lowStamina?'スタミナが切れかけた部員もいたが、':''}最後まで音を出し続けた。`,
+  ],
+  sectional:[
+    `${mem?mem.name+'の':'あるパートの'}苦手な箇所を、パート全員で支え合いながら乗り越えた。`,
+    `パートの中で意見が出た。「ここはこう吹いた方が」——そんな会話が、演奏を豊かにする。`,
+    highMorale.length>0?`${pick(highMorale).name}がパートをぐいぐい引っ張っていた。`:
+    `パートリーダーを中心に、細かいところを丁寧に確認していった。`,
+  ],
+  sectional_sup:[
+    `${G.advisor}先生の指摘は的確だった。「そこ、音が早い」——言われて初めて気づくことがある。`,
+    `先生がいる間、${mem?mem.name+'も':'部員たちも'}いつもより集中していた。終わった後は、少しぐったりしていたけれど。`,
+    `巡回が終わった後、${mem?mem.name+'が':'誰かが'}「やっぱり先生に聴いてもらうと違うね」とつぶやいた。`,
+  ],
+  intense:[
+    `${mem?mem.name+'は':'部員たちは'}苦手なフレーズと30分向き合い続けた。できない。でも止まらない。`,
+    `個人練習の時間、${highSkill.length>0?pick(highSkill).name+'は難しい曲をさらにレベルアップして練習していた。':
+    '各自が自分の弱点と向き合っていた。'}`,
+    lowMorale.length>0?`${pick(lowMorale).name}はうまくいかない自分に少し苛立っていたが、それでも手を止めなかった。`:
+    `繰り返すたびに、少しずつ指が動くようになってきた。`,
+  ],
+  teacher:[
+    `外部講師の先生は、一人ひとりの音をじっくり聴いていた。${mem?mem.name+'は':''}その視線を感じながら、いつも以上に集中した。`,
+    `「あなたたちには可能性がある」——その一言が、今週の練習を変えた。`,
+    `プロの視点で見ると、当たり前だと思っていたことが、実は改善できることだったと気づいた。`,
+  ],
+  mental:[
+    `「コンクールが怖い」——誰かが正直に言った。その言葉が、場の空気をやわらかくした。`,
+    `${mem?mem.name+'は':''} 目を閉じて演奏をイメージした。音楽は、頭の中でも鳴り続ける。`,
+    `チームとして戦うために、まず気持ちを一つにする週があってもいい。`,
+  ],
+  recording:[
+    `再生した音源を聴きながら、${mem?mem.name+'が':'誰かが'}「ここ、もっとこうできる」とメモを取った。`,
+    `客観的に自分の音を聴くことで、漠然とした不安が具体的な課題に変わった。`,
+    `「意外と悪くない」という声も上がった。聴いてみるまでわからないことがある。`,
+  ],
+  analysis:[
+    `「この学校、ここが強いよね」——${mem?mem.name+'が':'誰かが'}動画を止めながら言った。`,
+    `ライバルを知ることで、自分たちの練習に方向性が生まれた。`,
+    highMorale.length>0?`${pick(highMorale).name}は「絶対に勝ちたい」とつぶやいた。その目に、本気が宿っていた。`:
+    `他校の演奏を見た後、自然と練習の質が上がった気がした。`,
+  ],
+  concert:[
+    `舞台袖で緊張していた${mem?mem.name+'も':'部員たちも'}、音を出した瞬間に迷いが消えた。`,
+    `アンコールの拍手が来たとき、${mem?mem.name+'は':'部員たちは'}こみ上げるものを感じた。`,
+    `本番で緊張するのは、それだけ本気だということだ。終わった後、みんなそれを知っていた。`,
+  ],
+};
+const commonMidDescs=[];
+if(mem) commonMidDescs.push(
   `${mem.name}は今日も黙々と練習に向き合っていた。`,
-  `${mem.name}の表情が、先週より少し柔らかくなった気がした。`,
-  `${mem.name}が小さく息を吸い、楽器を構え直した。`
+  `${mem.name}の表情が、先週より少し柔らかくなった気がした。`
 );
-if(mem&&mem2) memberDescs.push(
+if(mem&&mem2) commonMidDescs.push(
   `${mem.name}と${mem2.name}が目を合わせ、小さく頷いた。`,
   `${mem2.name}が${mem.name}に「もう一回やってみよう」と声をかけた。`
 );
-if(lowMorale.length>0) memberDescs.push(
-  `${pick(lowMorale).name}は疲れた顔をしていたが、それでも楽器を離さなかった。`,
-  `${pick(lowMorale).name}の肩が少し落ちているのが気になった。`
+if(lowMorale.length>0) commonMidDescs.push(
+  `${pick(lowMorale).name}は疲れた顔をしていたが、それでも楽器を離さなかった。`
 );
-if(highMorale.length>0) memberDescs.push(
-  `${pick(highMorale).name}の演奏には、今週も迷いがなかった。`,
-  `${pick(highMorale).name}が楽しそうに音を出しているのが伝わってきた。`
+if(highMorale.length>0) commonMidDescs.push(
+  `${pick(highMorale).name}の演奏には、今週も迷いがなかった。`
 );
-if(lowSkill.length>0) memberDescs.push(
-  `${pick(lowSkill).name}は難しいフレーズで何度も止まりながら、それでも諦めなかった。`
-);
+const midDescs=pracMidDescs[pracTag]||commonMidDescs;
 
-// 変化描写バリエーション
+// ── 変化描写（パラメーター連動）──
 const changeDescs=[];
 if(skillDelta>3) changeDescs.push(
   `今週の練習は手応えがあった。音の輪郭が、確かに太くなってきている。`,
-  `パートの音がひとつになる瞬間が、少しずつ増えてきた。`,
   `「あ、揃った」——誰かが小さく呟いた。その瞬間が、今週一番の収穫だった。`
 );
 else if(skillDelta>0) changeDescs.push(
@@ -1395,8 +1895,65 @@ if(eventData) changeDescs.push(
   `${eventData.title}——それは今週の練習に、確かな影響を与えた。`
 );
 
-// 締めバリエーション
-const endings=[
+// ── 練習タグ別・締め ──
+const pracEndings={
+  basic:[
+    `基礎は地味だ。でも、ここを疎かにしたら先はない。部員たちはそれを知っていた。`,
+    `ロングトーンの余韻が、静かな練習室に消えていった。また来週も、ここから始まる。`,
+    `土台を固める一週間が終わった。目には見えないけれど、確かに積み上がっている。`,
+  ],
+  ensemble:[
+    `音が重なる喜びを、今週また少し感じることができた。合奏は、一人ではできないから美しい。`,
+    `バラバラだった音が、一つになっていく。その過程こそが、吹奏楽の醍醐味だと思った。`,
+    `全員の音が揃った瞬間、言葉はいらなかった。それだけで十分だった。`,
+  ],
+  song:[
+    `曲と向き合う時間は、自分と向き合う時間でもある。来週も、この曲と戦い続ける。`,
+    `本番まで、まだ時間はある。でも、それは永遠ではない。`,
+    `「この曲を好きになれたら、もっとうまくなれる」——${mem?mem.name+'は':'誰かは'}そう思っていた。`,
+  ],
+  sectional:[
+    `パートがひとつになったとき、合奏はさらに輝く。その日のために、今日もパート練習をした。`,
+    `細かいところを磨く地道な作業が、やがて大きな差になる。`,
+    `パートの絆が、少し深まった一週間だった。`,
+  ],
+  sectional_sup:[
+    `先生の目があるのは、ありがたいことだ。そう思えるようになったのも、成長かもしれない。`,
+    `厳しい目で見てもらえるうちが花だ。来週も、精一杯やろう。`,
+    `巡回が終わった後の、あの清々しい疲れ。また来週も、頑張れそうだった。`,
+  ],
+  intense:[
+    `できなかったことが、少しできるようになった。それだけで、今週は十分だ。`,
+    `苦手を克服する道は長い。でも、向き合い続けることが、一番の近道だと知っている。`,
+    `${mem?mem.name+'は':'部員たちは'}今週も自分の限界と戦った。その積み重ねが、やがて実を結ぶ。`,
+  ],
+  teacher:[
+    `プロの言葉は重い。でも、それだけ価値がある。来週の練習が、また少し変わるはずだ。`,
+    `外部の目を借りることで、自分たちだけでは気づけなかったことが見えてきた。`,
+    `先生が帰った後、練習室がいつもより静かだった。みんな、頭の中で整理していたのかもしれない。`,
+  ],
+  mental:[
+    `強い演奏は、強い気持ちから生まれる。今週はその土台を作った。`,
+    `心が整ったとき、音も変わる。そう信じて、また来週に臨む。`,
+    `技術だけじゃない。気持ちも鍛えることができる。それを知った一週間だった。`,
+  ],
+  recording:[
+    `録音を聴いた後の練習は、いつもと少し違って聴こえた。耳が変わると、音も変わる。`,
+    `自分の音を客観的に知ること。それが上達への一番の近道かもしれない。`,
+    `「また録って、聴いてみよう」——そう思えるようになったこと自体が、成長だった。`,
+  ],
+  analysis:[
+    `ライバルを研究した週が終わった。知ることは、戦う力になる。`,
+    `他校の良さを認めながら、自分たちの色を磨いていく。それが${G.school}らしさだと思った。`,
+    `分析が終わった後の練習は、なんとなく熱量が違った。`,
+  ],
+  concert:[
+    `本番の空気を体で覚えた。この感覚を、コンクールまで忘れないでいたい。`,
+    `観客の前で音楽を届けること。それが全ての練習の意味だと、また思い出した。`,
+    `演奏が終わった後の充実感。これがあるから、また頑張れる。`,
+  ],
+};
+const commonEndings=[
   `来週もまた、全国への道は続く。`,
   `${G.school}吹奏楽部の夏は、まだ終わらない。`,
   `音楽室の電気が消えても、部員たちの音は心の中で鳴り続けていた。`,
@@ -1405,12 +1962,12 @@ const endings=[
   `扉を閉める音が響いた。また明日、この音楽室に戻ってくる。`,
   `一週間が終わった。でも、音楽は終わらない。`,
 ];
+const endings=pracEndings[pracTag]||commonEndings;
 
 // 組み立て
 let s='';
 s+=pick(openings)+' ';
-if(practiceDescs.length) s+=pick(practiceDescs)+' ';
-if(memberDescs.length) s+=pick(memberDescs)+' ';
+if(midDescs.length) s+=pick(midDescs)+' ';
 if(changeDescs.length) s+=pick(changeDescs)+' ';
 s+=pick(endings);
 return s.trim();
@@ -1439,9 +1996,15 @@ G.month=G.month===12?1:G.month+1;
 const cfg=DIFF[G.diff];
 const income=G.dues*G.members.length;
 const expense=cfg.monthlyFixed;
-G.funds+=income-expense;
+// 学校特徴の月次資金ボーナス
+const featFundBonus=(G.feats||[]).reduce((sum,feat)=>{
+  const b=FEAT_BONUS[feat];
+  return sum+(b&&b.fundBonus?b.fundBonus:0);
+},0);
+G.funds+=income-expense+featFundBonus;
 if(G.funds<0) G.funds=0;
-addLog(`月次収支：+${income.toLocaleString()}円（部費）-${expense.toLocaleString()}円（固定費）`,'資金');
+const featBonusStr=featFundBonus>0?` +${featFundBonus.toLocaleString()}円（特徴補助）`:'';
+addLog(`月次収支：+${income.toLocaleString()}円（部費）-${expense.toLocaleString()}円（固定費）${featBonusStr}`,'資金');
 if(G.divisionChosen){
 const comp=getCompThisMonth();
 if(comp){
@@ -1547,10 +2110,11 @@ const w={
 const avgStamina=G.members.length?Math.round(G.members.reduce((a,m)=>a+m.stamina,0)/G.members.length):50;
 const staminaBonus=selK?.trait==='stamina'?Math.round((avgStamina-50)*0.15):0;
 const diffBonus=selK?Math.round((selK.difficulty-3)*2.5):0;
+const featCompBonus=(G.feats||[]).reduce((sum,feat)=>{const b=FEAT_BONUS[feat];return sum+(b&&b.compBonus?b.compBonus:0);},0);
 const memberCount=G.members.length;
 const reqCount=G.division==='large'?55:35;
 const countPenalty=Math.max(0,(reqCount-memberCount)*0.3);
-const base=G.skill*(w.skill||0.38)+G.ensemble*(w.ensemble||0.32)+G.song*(w.song||0.22)+G.morale*(w.morale||0.08)+staminaBonus+diffBonus;
+const base=G.skill*(w.skill||0.38)+G.ensemble*(w.ensemble||0.32)+G.song*(w.song||0.22)+G.morale*(w.morale||0.08)+staminaBonus+diffBonus+featCompBonus;
 const captainBonus=G.captain?3:0;
 const plBonus=(G.partLeaders&&G.partLeaders.length>=3)?2:0; // パートリーダーが揃うとボーナス
 const conflictPenalty=G.conflictActive?6:0;
@@ -1866,11 +2430,13 @@ addLog('サマーコンサート大成功！','イベント');
 }
 function monthEvent8(){
 const fundsCost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+const hasCampBonus=(G.feats||[]).some(f=>FEAT_BONUS[f]&&FEAT_BONUS[f].campBonus);
 if(G.funds>=fundsCost){
 G.funds-=fundsCost;
-applyAll(G,{skill:5,ens:5,stamina:6,morale:4});
+const campFx=hasCampBonus?{skill:7,ens:7,stamina:9,morale:6}:{skill:5,ens:5,stamina:6,morale:4};
+applyAll(G,campFx);
 showEventPopup('🏕️','夏合宿',
-`合宿費${fundsCost.toLocaleString()}円を使い、みっちり合宿練習を行った。\n体力も技術も大きく伸びた！`,'var(--teal)');
+`合宿費${fundsCost.toLocaleString()}円を使い、みっちり合宿練習を行った。\n体力も技術も大きく伸びた！${hasCampBonus?" 【合宿施設完備ボーナス！】":""}`,"var(--teal)");
 addLog(`夏合宿実施（-${fundsCost.toLocaleString()}円）。全パラメーター向上。`,'イベント');
 } else {
 showEventPopup('💸','合宿費が足りない',
