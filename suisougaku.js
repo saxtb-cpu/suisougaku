@@ -1563,8 +1563,8 @@ recalc();
 // 士気伝染チェック（練習前に適用）
 const contagion = applyMoraleContagion();
 const before={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds,
-  kadaiParams:G.kadaiParams?{...G.kadaiParams}:null,
-  jiyuParams:G.jiyuParams?{...G.jiyuParams}:null};
+  kadaiParams:G.kadaiParams?Object.assign({},G.kadaiParams):newSongParams(0),
+  jiyuParams:G.jiyuParams?Object.assign({},G.jiyuParams):newSongParams(0)};
 let pracName=null;
 let eventData=null;
 // 伝染が起きていたらイベントとして反映
@@ -1650,8 +1650,8 @@ addLog(ev.title,'イベント');
 }
 recalc();
 const after={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds,
-  kadaiParams:G.kadaiParams?{...G.kadaiParams}:null,
-  jiyuParams:G.jiyuParams?{...G.jiyuParams}:null};
+  kadaiParams:G.kadaiParams?Object.assign({},G.kadaiParams):newSongParams(0),
+  jiyuParams:G.jiyuParams?Object.assign({},G.jiyuParams):newSongParams(0)};
 showWeekResult(before,after,pracName,eventData);
 if(G.week>=WEEKS_PER_MONTH){
 G.week=1;
@@ -1724,15 +1724,23 @@ if(hasPiece&&(G.kaDaiKyoku?.selectedKadai||G.kaDaiKyoku?.selectedJiyu)){
     </div>`;
 }
 const sw=document.getElementById('wr-story-wrap');
-sw.innerHTML=`<div class="wr-story-loading">
-<div class="wr-story-dots"><div class="wr-story-dot"></div><div class="wr-story-dot"></div><div class="wr-story-dot"></div></div>
-<span>今週のストーリーを書いています…</span>
-</div>`;
+sw.innerHTML=`<div class="wr-story-text" id="wr-story-text"></div>`;
 document.getElementById('wr-continue-btn').disabled=true;
 document.getElementById('ov-week-result').classList.add('show');
-sw.innerHTML=`<div class="wr-story-text" id="wr-story-text"></div>`;
 const el=document.getElementById('wr-story-text');
-await typewriterEffect(el,buildFallbackStory(curWeek,pracName,eventData,before,after),18);
+// 少し待ってからタイプライター開始（モーダルが開くのを待つ）
+await new Promise(r=>setTimeout(r,80));
+try{
+  const storyText=buildFallbackStory(curWeek,pracName,eventData,before,after);
+  if(!storyText||storyText.trim()===''){
+    el.textContent='今週も練習が続いた。来週また頑張ろう。';
+  } else {
+    await typewriterEffect(el,storyText,18);
+  }
+} catch(e){
+  console.error('ストーリー生成エラー:',e);
+  el.textContent='今週も練習に励んだ。来週また頑張ろう。';
+}
 document.getElementById('wr-continue-btn').disabled=false;
 }
 async function generateWeekStory(week,pracName,eventData,before,after){
@@ -1812,8 +1820,12 @@ const data=await res.json();
 return data.content.map(b=>b.text||'').join('').trim();
 }
 function buildFallbackStory(week,pracName,eventData,before,after){
-const skillDelta=after.skill-before.skill;
-const moraleDelta=after.morale-before.morale;
+if(!G.members||G.members.length===0) return '今週も練習が続いた。来週また頑張ろう。';
+const skillDelta=(after.skill||0)-(before.skill||0);
+const moraleDelta=(after.morale||0)-(before.morale||0);
+const songDelta=(after.song||0)-(before.song||0);
+const kadaiDelta=after.kadaiParams&&before.kadaiParams?songAvg(after.kadaiParams)-songAvg(before.kadaiParams):songDelta;
+const jiyuDelta=after.jiyuParams&&before.jiyuParams?songAvg(after.jiyuParams)-songAvg(before.jiyuParams):songDelta;
 const pracTag=G._currentPracTag||'';
 const mem=G.members.length>0?pick(G.members):null;
 const mem2=G.members.length>1?pick(G.members.filter(m=>!mem||m.id!==mem.id)):null;
@@ -1823,6 +1835,7 @@ const highMorale=G.members.filter(m=>m.morale>75);
 const lowSkill=G.members.filter(m=>m.skill<35);
 const highSkill=G.members.filter(m=>m.skill>70);
 const avgStamina=G.members.length?Math.round(G.members.reduce((a,m)=>a+m.stamina,0)/G.members.length):50;
+const lowStamina=avgStamina<45;
 
 // ── 練習タグ別・特化した書き出し ──
 const pracOpenings={
