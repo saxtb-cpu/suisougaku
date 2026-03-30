@@ -384,7 +384,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div class="stat-grid">
 <div class="stat-card"><div class="stat-lbl">総合技術力</div><div class="stat-val" id="sv-skill" style="color:var(--blue)">—</div><div class="stat-sub">/ 100</div></div>
 <div class="stat-card"><div class="stat-lbl">アンサンブル</div><div class="stat-val" id="sv-ens" style="color:#7050b0">—</div><div class="stat-sub">/ 100</div></div>
-<div class="stat-card" id="sv-song-card"><div class="stat-lbl">コンクール曲精度</div><div class="stat-val" id="sv-song" style="color:var(--teal)">—</div><div class="stat-sub">/ 100</div></div>
+<div class="stat-card" id="sv-song-card"><div class="stat-lbl">曲精度（平均）</div><div class="stat-val" id="sv-song" style="color:var(--teal)">—</div><div class="stat-sub">/ 100</div></div>
 <div class="stat-card"><div class="stat-lbl">部の士気</div><div class="stat-val" id="sv-morale" style="color:var(--green)">—</div><div class="stat-sub">/ 100</div></div>
 </div>
 <div class="card"><div class="card-h">🎼 パート別技術力</div><div id="skill-bars"></div></div>
@@ -431,6 +431,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div class="card">
 <div class="card-h">🎼 今年度の編成</div>
 <div id="division-status" style="font-size:12px;color:var(--ink2)">—</div>
+</div>
+<div id="radar-kadai" style="display:none" class="card">
+<div class="card-h">📊 <span id="radar-kadai-title">課題曲</span> <span style="font-size:11px;color:var(--teal);font-weight:400">平均精度：<strong id="radar-kadai-avg">0</strong></span></div>
+<svg id="radar-kadai-svg" viewBox="0 0 200 200" style="width:100%;max-width:220px;display:block;margin:0 auto"></svg>
+</div>
+<div id="radar-jiyu" style="display:none" class="card">
+<div class="card-h">📊 <span id="radar-jiyu-title">自由曲</span> <span style="font-size:11px;color:var(--teal);font-weight:400">平均精度：<strong id="radar-jiyu-avg">0</strong></span></div>
+<svg id="radar-jiyu-svg" viewBox="0 0 200 200" style="width:100%;max-width:220px;display:block;margin:0 auto"></svg>
 </div>
 <div class="card"><div class="card-h">📊 次大会予測</div><div id="next-comp" style="font-size:12px;color:var(--ink2)">—</div></div>
 <div class="scr-h" style="font-size:13px;margin-top:4px">📜 履歴</div>
