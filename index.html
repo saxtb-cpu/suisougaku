@@ -384,7 +384,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div class="stat-grid">
 <div class="stat-card"><div class="stat-lbl">総合技術力</div><div class="stat-val" id="sv-skill" style="color:var(--blue)">—</div><div class="stat-sub">/ 100</div></div>
 <div class="stat-card"><div class="stat-lbl">アンサンブル</div><div class="stat-val" id="sv-ens" style="color:#7050b0">—</div><div class="stat-sub">/ 100</div></div>
-<div class="stat-card" id="sv-song-card"><div class="stat-lbl">曲精度（平均）</div><div class="stat-val" id="sv-song" style="color:var(--teal)">—</div><div class="stat-sub">/ 100</div></div>
+<div class="stat-card" id="sv-song-card" onclick="openSongDetail()" style="cursor:pointer;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 4px 16px rgba(26,128,112,.18)'" onmouseout="this.style.boxShadow=''"><div class="stat-lbl">曲精度（平均）<span style="font-size:9px;color:var(--teal);margin-left:4px">▶ 詳細</span></div><div class="stat-val" id="sv-song" style="color:var(--teal)">—</div><div class="stat-sub">/ 100</div></div>
 <div class="stat-card"><div class="stat-lbl">部の士気</div><div class="stat-val" id="sv-morale" style="color:var(--green)">—</div><div class="stat-sub">/ 100</div></div>
 </div>
 <div class="card"><div class="card-h">🎼 パート別技術力</div><div id="skill-bars"></div></div>
@@ -490,6 +490,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div id="rp-comps" style="font-size:11px;color:var(--ink2)"></div>
 </div>
 </aside>
+</div>
+</div>
+<div class="overlay" id="ov-song-detail">
+<div class="modal" style="max-width:480px;width:95vw">
+<div style="font-family:var(--serif);font-size:17px;font-weight:800;margin-bottom:4px">🎼 コンクール曲 パラメーター</div>
+<div style="font-size:11px;color:var(--ink3);margin-bottom:16px" id="sd-subtitle">—</div>
+<div id="sd-body"></div>
+<button class="btn btn-sm" onclick="closeModal('ov-song-detail')" style="margin-top:14px;width:100%">閉じる</button>
+</div>
+</div>
+<div class="overlay" id="ov-spring-concert">
+<div class="modal" style="max-width:400px">
+<div style="font-family:var(--serif);font-size:17px;font-weight:800;margin-bottom:4px">🎹 春季定期演奏会</div>
+<div style="font-size:11px;color:var(--ink3);margin-bottom:14px">開催するかどうか決めてください</div>
+<div id="spring-concert-body"></div>
 </div>
 </div>
 <div class="overlay" id="ov-save">
