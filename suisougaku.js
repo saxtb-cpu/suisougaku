@@ -669,6 +669,7 @@ function generateMembers(count,cfg){
 const members=[];
 const totW=Object.values(PART_W).reduce((a,b)=>a+b,0);
 const REQUIRED_PARTS=['フルート','クラリネット','トランペット','打楽器'];
+const alloc={};
 PARTS.forEach(p=>{
   const ratio=PART_W[p]/totW;
   const raw=count*ratio;
