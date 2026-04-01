@@ -1500,6 +1500,7 @@ renderMembers();
 renderRightPanel();
 }
 function buildPracticeGrid(){
+if(!G||!G.members) return; // G未初期化時はスキップ
 // 試験週は練習グリッドを差し替え
 if(isExamWeek()){
   document.getElementById('week-grid').innerHTML=`
@@ -1590,6 +1591,7 @@ ${warnings.map(w=>`<div style="color:var(--amber);font-size:10px;margin-top:2px"
 // ================================================================
 function isExamWeek(){
   // 7月第1週：期末試験
+  if(!G) return false;
   return G.month === 7 && G.week === 1;
 }
 function advanceWeek(){
@@ -2736,9 +2738,12 @@ async function showExamWeekResult(before, after){
       💤 スタミナ回復：全部員 +${rnd(3,7)}前後
     </div>`;
 
-  // ストーリー
+  // モーダルを先に開いてからストーリー表示
+  document.getElementById('wr-continue-btn').disabled=true;
+  document.getElementById('ov-week-result').classList.add('show');
   if(sw){
     sw.innerHTML=`<div class="wr-story-text" id="wr-story-text"></div>`;
+    await new Promise(r=>setTimeout(r,80));
     const storyEl=document.getElementById('wr-story-text');
     const mem=G.members.length>0?pick(G.members):null;
     const stories=[
@@ -2750,7 +2755,6 @@ async function showExamWeekResult(before, after){
     await typewriterEffect(storyEl, pick(stories), 18);
   }
   document.getElementById('wr-continue-btn').disabled=false;
-  document.getElementById('ov-week-result').classList.add('show');
 }
 function runSpringConcert(){
 const upperMembers = G.members.filter(m=>m.grade>=2);
