@@ -448,7 +448,10 @@ const moraleBonus = pers==='ムードメーカー'?1.2 : pers==='リーダーシ
 const moralePenalty = pers==='完璧主義者'?1.3 : pers==='繊細なアーティスト'?1.2 : 1.0;
 const staminaFactor = m.stamina < 30 ? 0.4 : m.stamina < 50 ? 0.7 : m.stamina < 70 ? 0.9 : 1.0;
 const moraleFactor = m.morale < 25 ? 0.4 : m.morale < 45 ? 0.7 : m.morale < 60 ? 0.9 : 1.0;
-const growthFactor = effortBonus * staminaFactor * moraleFactor;
+// 夏休みボーナス（8月）：練習効果1.3倍・スタミナ消耗増
+const isSummer = G && G.month === 8;
+const summerMult = isSummer ? 1.3 : 1.0;
+const growthFactor = effortBonus * staminaFactor * moraleFactor * summerMult;
 
 // 成長抵抗：個人のポテンシャルで鈍化ラインが変わる
 // potential: 55〜98で生成。高いほど伸びしろ大
@@ -488,7 +491,7 @@ if(fx.skill)   m.skill     =cap(m.skill     +Math.round((fx.skill  +rnd(-3,2))*g
 if(fx.ens)     m.expression=cap(m.expression+Math.round((fx.ens    +rnd(-3,2))*growthFactor*ensCeil*sectFactor));
 
 // スタミナは練習するたびに必ず少し消耗する
-const staminaCost = rnd(1,3);
+const staminaCost = rnd(1,3) + (isSummer ? rnd(1,2) : 0); // 夏は消耗増
 m.stamina = cap(m.stamina - staminaCost + (fx.stamina ? fx.stamina + rnd(-1,1) : 0));
 
 if(fx.morale){
@@ -771,6 +774,7 @@ shirkerIds:[],           // 現在さぼっている部員ID
 songBoredom:0,           // 曲練習連続カウント（マンネリ）
 sectionalDebt:0,         // パート練習不足カウント
 _springConcert:null,     // 春季演奏会の開催決定（null=未決定, true=開催, false=見送り）
+_campPlan:null,          // 合宿計画（null=未計画, {theme,cost}=計画済み）
 feats:schoolData.feats||[], // 学校の特徴
 };
 // 学校特徴ボーナスを部員に適用
@@ -1501,7 +1505,20 @@ renderMembers();
 renderRightPanel();
 }
 function buildPracticeGrid(){
-if(!G||!G.members) return; // G未初期化時はスキップ
+if(!G||!G.members) return;
+// 合宿週は練習グリッドを差し替え
+if(isCampWeek()){
+  const theme=G._campPlan?.theme;
+  document.getElementById('week-grid').innerHTML=`
+    <div style="grid-column:1/-1;background:var(--teal2);border:1.5px solid var(--teal);border-radius:10px;padding:18px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">🏕️</div>
+      <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--teal);margin-bottom:6px">${theme?theme.icon+' '+theme.label:'夏合宿（2泊3日）'}</div>
+      <div style="font-size:12px;color:var(--ink2)">${theme?theme.desc:'合宿を実施します。'}<br>費用：${(G._campPlan?.cost||0).toLocaleString()}円</div>
+    </div>`;
+  document.getElementById('prac-preview').style.display='none';
+  document.getElementById('sel-prac-name').textContent='合宿週（自動実行）';
+  return;
+}
 // 試験週は練習グリッドを差し替え
 if(isExamWeek()){
   document.getElementById('week-grid').innerHTML=`
@@ -1591,14 +1608,23 @@ ${warnings.map(w=>`<div style="color:var(--amber);font-size:10px;margin-top:2px"
 // 試験週判定
 // ================================================================
 function isExamWeek(){
-  // 7月第1週：期末試験
   if(!G) return false;
   return G.month === 7 && G.week === 1;
+}
+function isCampWeek(){
+  if(!G) return false;
+  // 8月第1週 かつ 合宿計画済み（見送りでない）
+  return G.month === 8 && G.week === 1 && G._campPlan && !G._campPlan.skip;
 }
 function advanceWeek(){
 // ── 試験週チェック ──
 if(isExamWeek()){
   runExamWeek();
+  return;
+}
+// ── 合宿週チェック ──
+if(isCampWeek()){
+  runCampWeek();
   return;
 }
 recalc();
@@ -2236,6 +2262,7 @@ G.shirkerIds=[];
 G.songBoredom=0;
 G.sectionalDebt=0;
 G._springConcert=null;
+G._campPlan=null;
 G._monthEventDone={};
 if(prevCaptainGrad){G.captain=null;addLog('部長が卒業しました。新部長を2〜3月に選出してください。','システム');}
 const hasComp=G.compHistory.some(c=>c.year===G.year-1);
@@ -2590,6 +2617,101 @@ if(G.year===1) return; // 1年目は enterGame で対応済み
 showEventPopup('🌸','入学式シーズン',
 '新入生が入学し、部活への見学者が増えた。部員募集のチャンスだ。','var(--rose)');
 }
+
+// ================================================================
+// 合宿計画システム
+// ================================================================
+const CAMP_THEMES = [
+  {
+    id:'basic',
+    icon:'🎵',
+    label:'基礎強化合宿',
+    desc:'音程・ロングトーン・スケールを徹底的に叩き込む。地味だが確実に土台が固まる。',
+    fx:{pitch:8, rhythm:3, tempo:5, expression:2, balance:4, skill:5, stamina:-4, morale:3},
+  },
+  {
+    id:'song',
+    icon:'🎼',
+    label:'コンクール曲集中合宿',
+    desc:'課題曲・自由曲を繰り返し通しで演奏。本番に向けた曲の仕上がりを一気に引き上げる。',
+    fx:{pitch:4, rhythm:5, tempo:4, expression:6, balance:5, skill:3, stamina:-5, morale:2},
+  },
+  {
+    id:'stamina',
+    icon:'💪',
+    label:'体力強化合宿',
+    desc:'長時間練習・体力トレーニングを重視。スタミナをつけて後半のバテを防ぐ。',
+    fx:{pitch:2, rhythm:3, tempo:4, expression:1, balance:2, skill:2, stamina:8,  morale:4},
+  },
+  {
+    id:'team',
+    icon:'🤝',
+    label:'チームビルディング合宿',
+    desc:'アンサンブルとチームワークに集中。部員の絆を深め、合奏の一体感を高める。',
+    fx:{pitch:2, rhythm:6, tempo:3, expression:5, balance:7, skill:2, stamina:-2, morale:10},
+  },
+];
+
+function openCampPlanModal(){
+  const cap_=G.captain;
+  const execs=G.execs||[];
+  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  const hasCampBonus=(G.feats||[]).some(f=>FEAT_BONUS[f]&&FEAT_BONUS[f].campBonus);
+  const el=document.getElementById('camp-plan-body');
+  if(!el) return;
+  el.innerHTML=`
+    <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">
+      ${cap_?`👑 ${cap_.name}（部長）`:'部長未選出'}と幹部が合宿の計画を立てています。<br>
+      <strong>合宿費用：${cost.toLocaleString()}円</strong>
+      ${hasCampBonus?' <span style="color:var(--teal);font-size:10px">【合宿施設完備：効果1.5倍！】</span>':''}
+      ${G.funds<cost?'<div style="color:var(--red);font-size:11px;margin-top:4px">⚠ 現在の資金（'+G.funds.toLocaleString()+'円）が不足しています</div>':''}
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px">練習テーマを選んでください</div>
+    ${CAMP_THEMES.map(t=>`
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .15s"
+        onclick="selectCampTheme('${t.id}')" id="camp-theme-${t.id}"
+        onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:16px">${t.icon}</span>
+          <span style="font-size:13px;font-weight:700">${t.label}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);margin-bottom:6px">${t.desc}</div>
+        <div style="font-size:10px;color:var(--ink3);display:flex;gap:8px;flex-wrap:wrap">
+          ${t.fx.skill>0?`<span>技術+${t.fx.skill}</span>`:''}
+          ${t.fx.stamina>0?`<span>スタミナ+${t.fx.stamina}</span>`:`<span style="color:var(--red)">スタミナ${t.fx.stamina}</span>`}
+          ${t.fx.morale>0?`<span>士気+${t.fx.morale}</span>`:''}
+          <span style="color:var(--teal)">曲パラメーター効果あり</span>
+        </div>
+      </div>`).join('')}
+    <button class="btn btn-sm" style="margin-top:4px;width:100%" onclick="decideCamp(null)">今年は合宿を見送る</button>`;
+  document.getElementById('ov-camp-plan').classList.add('show');
+}
+
+function selectCampTheme(themeId){
+  document.querySelectorAll('[id^="camp-theme-"]').forEach(el=>{
+    el.style.borderColor='var(--border)';
+    el.style.background='var(--bg)';
+  });
+  const el=document.getElementById('camp-theme-'+themeId);
+  if(el){ el.style.borderColor='var(--teal)'; el.style.background='var(--teal2)'; }
+  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  decideCamp(themeId);
+}
+
+function decideCamp(themeId){
+  closeModal('ov-camp-plan');
+  if(!themeId){
+    G._campPlan={skip:true};
+    notif('合宿見送り','今年は合宿を見送りにしました。');
+    addLog('合宿：今年は見送り。','イベント');
+    return;
+  }
+  const theme=CAMP_THEMES.find(t=>t.id===themeId);
+  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  G._campPlan={themeId, theme, cost};
+  notif('合宿計画決定',`「${theme.label}」で合宿を計画しました！8月第1週に実施します🏕️`);
+  addLog(`合宿計画：「${theme.label}」（費用：${cost.toLocaleString()}円）`,'イベント');
+}
 function openSpringConcertModal(upperCount){
   const body=document.getElementById('spring-concert-body');
   if(!body){
@@ -2757,6 +2879,146 @@ async function showExamWeekResult(before, after){
   }
   document.getElementById('wr-continue-btn').disabled=false;
 }
+
+async function runCampWeek(){
+  recalc();
+  const plan=G._campPlan;
+  const theme=plan.theme;
+  const cost=plan.cost;
+  const hasCampBonus=(G.feats||[]).some(f=>FEAT_BONUS[f]&&FEAT_BONUS[f].campBonus);
+  const mult=hasCampBonus?1.5:1.0;
+
+  const before={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds,
+    kadaiParams:G.kadaiParams?Object.assign({},G.kadaiParams):newSongParams(0),
+    jiyuParams:G.jiyuParams?Object.assign({},G.jiyuParams):newSongParams(0)};
+
+  if(G.funds>=cost){
+    G.funds-=cost;
+    // 部員への効果適用
+    G.members.forEach(m=>{
+      m.skill    =cap(m.skill    +Math.round((theme.fx.skill   +rnd(-2,2))*mult));
+      m.stamina  =cap(m.stamina  +Math.round((theme.fx.stamina +rnd(-1,1))*mult));
+      m.morale   =cap(m.morale   +Math.round((theme.fx.morale  +rnd(-2,2))*mult));
+      m.expression=cap(m.expression+Math.round(2*mult));
+    });
+    // 曲パラメーター更新
+    ['kadaiParams','jiyuParams'].forEach(key=>{
+      if(!G[key]) G[key]=newSongParams(0);
+      const hasSelected=key==='kadaiParams'?!!G.kaDaiKyoku?.selectedKadai:!!G.kaDaiKyoku?.selectedJiyu;
+      if(!hasSelected) return;
+      SONG_PARAMS.forEach(p=>{
+        const gain=theme.fx[p.key]||0;
+        G[key][p.key]=cap(G[key][p.key]+Math.round((gain+rnd(-1,1))*mult));
+      });
+    });
+    // G.song更新
+    G.song=Math.round((songAvg(G.kadaiParams)+songAvg(G.jiyuParams))/2);
+    addLog(`夏合宿「${theme.label}」実施（-${cost.toLocaleString()}円）${hasCampBonus?' 施設ボーナス×1.5':''}`, 'イベント');
+  } else {
+    // 資金不足
+    G.members.forEach(m=>m.morale=cap(m.morale-rnd(3,6)));
+    addLog('夏合宿：資金不足で断念。士気低下。','イベント');
+  }
+
+  recalc();
+  const after={skill:G.skill,ensemble:G.ensemble,song:G.song,morale:G.morale,funds:G.funds,
+    kadaiParams:G.kadaiParams?Object.assign({},G.kadaiParams):newSongParams(0),
+    jiyuParams:G.jiyuParams?Object.assign({},G.jiyuParams):newSongParams(0)};
+
+  selPracId=null;
+  if(G.week>=WEEKS_PER_MONTH){G.week=1;G._pendingMonthAdvance=true;}
+  else{G.week++;}
+
+  // 結果画面表示
+  const el_week=document.getElementById('wr-week-badge');
+  const el_title=document.getElementById('wr-title');
+  const el_prac=document.getElementById('wr-prac-label-wrap');
+  const el_event=document.getElementById('wr-event-area');
+  const el_rows=document.getElementById('wr-rows');
+  const sw=document.getElementById('wr-story-wrap');
+
+  if(el_week) el_week.textContent=`${MN[G.month]} 第1週`;
+  if(el_title) el_title.textContent='合宿の記録';
+  if(el_prac) el_prac.innerHTML=`<span class="wr-prac-label" style="background:var(--teal);color:#fff">🏕️ ${theme.icon} ${theme.label}</span>`;
+
+  const success=G.funds>=0;
+  if(el_event) el_event.innerHTML=`
+    <div class="wr-event-badge" style="border-color:var(--teal)">
+      <div class="wr-event-icon">${success?'🏕️':'💸'}</div>
+      <div>
+        <div class="wr-event-title">${success?`夏合宿（2泊3日）`:'合宿費が足りなかった'}</div>
+        <div class="wr-event-body">${success
+          ?`${theme.label}で合宿を実施。費用${cost.toLocaleString()}円。${hasCampBonus?'【施設完備ボーナス：効果×1.5】':''}`
+          :'資金不足で合宿を断念。部員たちは残念そうだった。'}</div>
+      </div>
+    </div>`;
+
+  const params=[
+    {lbl:'総合技術力',   before:before.skill,   after:after.skill,   col:'var(--blue)'},
+    {lbl:'アンサンブル', before:before.ensemble, after:after.ensemble,col:'#7050b0'},
+    {lbl:'士気',         before:before.morale,   after:after.morale,  col:'var(--green)'},
+    {lbl:'資金（円）',   before:before.funds,    after:after.funds,   col:'var(--gold)',isMoney:true},
+  ];
+  if(el_rows) el_rows.innerHTML=params.map(p=>{
+    const delta=p.after-p.before;
+    const dStr=p.isMoney?(delta>=0?'+'+delta.toLocaleString():delta.toLocaleString()):(delta>=0?'+'+delta:String(delta));
+    const dCls=delta>0?'wr-plus':delta<0?'wr-minus':'wr-zero';
+    return `<div class="wr-row"><div class="wr-lbl">${p.lbl}</div><div class="wr-vals">
+      <span class="wr-old">${p.isMoney?p.before.toLocaleString():p.before}</span>
+      <span class="wr-arrow">→</span>
+      <span class="wr-new" style="color:${p.col}">${p.isMoney?p.after.toLocaleString():p.after}</span>
+      <span class="wr-delta ${dCls}">${dStr}</span>
+    </div></div>`;
+  }).join('');
+
+  // 5軸表示
+  if(success&&(G.kaDaiKyoku?.selectedKadai||G.kaDaiKyoku?.selectedJiyu)){
+    const miniRows=SONG_PARAMS.map(sp=>{
+      const bv=before.kadaiParams?.[sp.key]??0;
+      const av=after.kadaiParams?.[sp.key]??0;
+      const d=av-bv;
+      return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;font-size:11px">
+        <span style="width:18px;text-align:center">${sp.icon}</span>
+        <span style="flex:1;color:var(--ink2)">${sp.label}</span>
+        <span style="color:var(--ink3)">${bv}</span><span style="color:var(--ink4)">→</span>
+        <span style="color:${sp.col};font-weight:700">${av}</span>
+        <span class="wr-delta ${d>0?'wr-plus':d<0?'wr-minus':'wr-zero'}" style="min-width:28px;text-align:right">${d>=0?'+':''}${d}</span>
+      </div>`;
+    }).join('');
+    el_rows.innerHTML+=`<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;margin-top:8px">
+      <div style="font-size:10px;color:var(--ink3);font-weight:700;margin-bottom:6px">🎼 曲パラメーター（課題曲）</div>${miniRows}</div>`;
+  }
+
+  document.getElementById('wr-continue-btn').disabled=true;
+  document.getElementById('ov-week-result').classList.add('show');
+  if(sw){
+    sw.innerHTML=`<div class="wr-story-text" id="wr-story-text"></div>`;
+    await new Promise(r=>setTimeout(r,80));
+    const storyEl=document.getElementById('wr-story-text');
+    const mem=G.members.length>0?pick(G.members):null;
+    const campStories={
+      basic:[
+        `${mem?mem.name+'たちは':'部員たちは'}ロングトーンと音階を何時間も繰り返した。「つまらない」と思う子もいたかもしれない。でも合宿が終わる頃、音が変わっていた。`,
+        `朝から晩まで基礎練習。${G.advisor}先生の「もう一回」が何度響いただろう。でも確かに、音の芯が太くなってきた。`,
+      ],
+      song:[
+        `通し演奏、止めて直す、また通す。その繰り返しが2泊3日続いた。${mem?mem.name+'の':'誰かの'}音が、最終日に初めて「曲」に聴こえた瞬間があった。`,
+        `コンクール曲と向き合い続けた合宿。疲れたけど、曲が「自分たちの音楽」になってきた感覚があった。`,
+      ],
+      stamina:[
+        `朝練から夜練まで、過去最長の練習時間だった。${mem?mem.name+'は':'部員たちは'}バテバテになりながらも最後まで楽器を手放さなかった。`,
+        `体が悲鳴を上げても吹き続けた2泊3日。コンクール本番まで、この経験が身体を支えてくれるはずだ。`,
+      ],
+      team:[
+        `パート別の壁を取り払い、全員で音楽の話をした夜があった。${mem?mem.name+'の':''} 一言が、チームをひとつにした気がした。`,
+        `音楽だけじゃなく、お互いのことを知った合宿だった。${mem&&G.members.length>1?'「こんな子だったんだ」と気づいた部員も多かった。':'帰り道、みんなが少し仲良くなっていた。'}`,
+      ],
+    };
+    const stories=campStories[plan.themeId]||campStories.basic;
+    await typewriterEffect(storyEl,pick(stories),18);
+  }
+  document.getElementById('wr-continue-btn').disabled=false;
+}
 function runSpringConcert(){
 const upperMembers = G.members.filter(m=>m.grade>=2);
 const upper = upperMembers.length;
@@ -2802,17 +3064,19 @@ await generateJiyuKyoku();
 }
 }
 function monthEvent7(){
-// 7月は地区大会がメイン・第1週は試験週（advanceWeek内で処理済み）
-// ここではコンクール直前の緊張感を演出
+// 7月：合宿計画会議 + コンクール直前の雰囲気
+// 合宿計画がまだなら計画を立てる
+if(!G._campPlan){
+  setTimeout(()=>openCampPlanModal(), 600);
+}
+// コンクール直前の雰囲気
 const roll=Math.random();
 if(roll<0.50){
-  // ライバル校情報
   applyAll(G,{morale:4,skill:2});
   showEventPopup('🔥','ライバル校の情報が入った',
     '地区大会に出場するライバル校の演奏の噂が耳に入った。「負けたくない」という気持ちが部全体を引き締めた。','var(--amber)');
   addLog('ライバル校情報入手。モチベーション向上。','イベント');
 } else {
-  // コンクール直前の緊張
   applyAll(G,{morale:-2,skill:3});
   showEventPopup('😰','コンクール直前の緊張',
     '試験が終わり、いよいよコンクールが近づいてきた。練習室の空気がぴりっと引き締まっている。緊張はあるが、音は確実に仕上がってきた。','var(--teal)');
@@ -2820,21 +3084,14 @@ if(roll<0.50){
 }
 }
 function monthEvent8(){
-const fundsCost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
-const hasCampBonus=(G.feats||[]).some(f=>FEAT_BONUS[f]&&FEAT_BONUS[f].campBonus);
-if(G.funds>=fundsCost){
-G.funds-=fundsCost;
-const campFx=hasCampBonus?{skill:7,ens:7,stamina:9,morale:6}:{skill:5,ens:5,stamina:6,morale:4};
-applyAll(G,campFx);
-showEventPopup('🏕️','夏合宿',
-`合宿費${fundsCost.toLocaleString()}円を使い、みっちり合宿練習を行った。\n体力も技術も大きく伸びた！${hasCampBonus?" 【合宿施設完備ボーナス！】":""}`,"var(--teal)");
-addLog(`夏合宿実施（-${fundsCost.toLocaleString()}円）。全パラメーター向上。`,'イベント');
-} else {
-showEventPopup('💸','合宿費が足りない',
-'夏合宿を行いたかったが、資金不足で断念した。通常練習で乗り切ろう。','var(--red)');
-applyAll(G,{morale:-4});
-addLog('夏合宿：資金不足で断念。','イベント');
-}
+// 8月は夏休み期間：練習効果アップ・スタミナ消耗増のお知らせ
+// 合宿は第1週に自動実行（advanceWeek内で処理）
+const campMsg=G._campPlan&&!G._campPlan.skip
+  ?`今週から合宿を実施します（${G._campPlan.theme.label}）。`
+  :G._campPlan?.skip?'今年の合宿は見送りです。':'合宿の計画がまだです。7月に計画を立ててください。';
+showEventPopup('☀️','夏休み練習期間スタート',
+  `夏休みに入り、練習時間がたっぷり取れます。\n練習効果が通常より高くなりますが、疲れも溜まりやすいです。\n${campMsg}`,'var(--gold)');
+addLog('夏休み練習期間開始。練習効果1.3倍・スタミナ消耗増。','システム');
 }
 function monthEvent9(){
 // アンコングループ編成
