@@ -248,8 +248,8 @@ const COMP_T_LARGE={
 '支部大会（大編成）': {金:77,銀:63,銅:49,passLine:77,passCount:3},
 '全国大会':           {金:87,銀:75,銅:62,passLine:null,passCount:0},
 };
-const COMP_SCHEDULE_MID  =[{m:8,name:'県大会（中編成）'},{m:9,name:'支部大会（中編成）'},{m:10,name:'東日本大会'}];
-const COMP_SCHEDULE_LARGE=[{m:7,name:'地区大会（大編成）'},{m:8,name:'県大会（大編成）'},{m:9,name:'支部大会（大編成）'},{m:10,name:'全国大会'}];
+const COMP_SCHEDULE_MID  =[{m:8,w:2,name:'県大会（中編成）'},{m:9,w:4,name:'支部大会（中編成）'},{m:10,w:4,name:'東日本大会'}];
+const COMP_SCHEDULE_LARGE=[{m:7,w:4,name:'地区大会（大編成）'},{m:8,w:2,name:'県大会（大編成）'},{m:9,w:4,name:'支部大会（大編成）'},{m:10,w:4,name:'全国大会'}];
 const COMP_T={...({})}; // 動的に生成
 const MN={4:'4月',5:'5月',6:'6月',7:'7月',8:'8月',9:'9月',10:'10月',11:'11月',12:'12月',1:'1月',2:'2月',3:'3月'};
 const WEEKS_PER_MONTH=4;
@@ -1363,7 +1363,7 @@ const isC=m===G.month,isPast=i<ci;
 return `<div class="sch-m ${isC?'cur':''} ${isPast?'past':''}" onclick="showSchD(${m})">
 <div class="sch-lbl">${MN[m]}</div><div class="sch-num">${m}</div>
 <div class="sch-ev">
-${(G.compSchedule||[]).find(s=>s.m===m)?`<div><span class="ev-dot" style="background:var(--gold)"></span>${(G.compSchedule.find(s=>s.m===m)||{}).name||'大会'}</div>`:''}
+${(G.compSchedule||[]).find(s=>s.m===m)?`<div><span class="ev-dot" style="background:var(--gold)"></span>${(G.compSchedule.find(s=>s.m===m)||{}).name||'大会'}（第${(G.compSchedule.find(s=>s.m===m)||{}).w||'?'}週）</div>`:''}
 ${(MONTHLY_EVENTS[m]||[]).slice(0,1).map(e=>`<div><span class="ev-dot" style="background:var(--blue)"></span>${e}</div>`).join('')}
 </div></div>`;
 }).join('');
@@ -1372,7 +1372,7 @@ function showSchD(m){
 const evs=MONTHLY_EVENTS[m]||[];
 let h=`<strong>${MN[m]}のイベント</strong><br><br>`;
 const compEntry=(G.compSchedule||[]).find(s=>s.m===m);
-if(compEntry)h+=`<div style="color:var(--gold);margin-bottom:5px">🏆 ${compEntry.name}</div>`;
+if(compEntry)h+=`<div style="color:var(--gold);margin-bottom:5px">🏆 ${compEntry.name}（第${compEntry.w||'?'}週）</div>`;
 h+=evs.map(e=>`<div style="margin-bottom:3px">• ${e}</div>`).join('');
 document.getElementById('sch-detail').innerHTML=h;
 }
@@ -1392,7 +1392,7 @@ document.getElementById('rp-comps').innerHTML='<span style="color:var(--amber)">
 } else {
 const upcoming=(G.compSchedule||[]).filter(s=>s.qualified&&!s.done).slice(0,3);
 document.getElementById('rp-comps').innerHTML=upcoming.map(s=>
-`<div style="margin-bottom:4px"><span style="color:var(--gold)">▶</span> ${s.m}月 <span style="font-size:11px">${s.name}</span></div>`).join('')
+`<div style="margin-bottom:4px"><span style="color:var(--gold)">▶</span> ${s.m}月第${s.w||'?'}週 <span style="font-size:11px">${s.name}</span></div>`).join('')
 ||'<span style="color:var(--ink3)">今クール終了</span>';
 }
 }
@@ -1522,6 +1522,28 @@ if(isCampWeek()){
   document.getElementById('sel-prac-name').textContent='合宿週（自動実行）';
   return;
 }
+// コンクール週は練習グリッドを差し替え
+if(isCompWeek()){
+  const comp=getCompThisWeek();
+  const tbl=getCompTable();
+  const t=tbl[comp.name];
+  const pred=calcScore();
+  const predResult=t?(pred>=t.金?'金賞圏内！':pred>=t.銀?'銀賞ライン':pred>=t.銅?'銅賞ライン':'入賞ライン以下'):'';
+  const isNational=comp.name.includes('全国')||comp.name.includes('東日本');
+  const bgCol=isNational?'var(--gold3)':'var(--blue2)';
+  const bdCol=isNational?'var(--gold)':'var(--blue)';
+  const txCol=isNational?'var(--gold)':'var(--blue)';
+  document.getElementById('week-grid').innerHTML=`
+    <div style="grid-column:1/-1;background:${bgCol};border:1.5px solid ${bdCol};border-radius:10px;padding:18px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">${isNational?'🏆':'🎺'}</div>
+      <div style="font-family:var(--serif);font-size:16px;font-weight:800;color:${txCol};margin-bottom:6px">${comp.name}</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">今週は本番当日です。練習の成果を発揮しよう！</div>
+      ${t?`<div style="font-size:11px;color:var(--ink3)">予測スコア：<strong style="color:${txCol}">${pred}点</strong>　→　${predResult}<br>金賞：${t.金}点 ／ 銀賞：${t.銀}点 ／ 銅賞：${t.銅}点</div>`:''}
+    </div>`;
+  document.getElementById('prac-preview').style.display='none';
+  document.getElementById('sel-prac-name').textContent='コンクール当日（自動実行）';
+  return;
+}
 // 試験週は練習グリッドを差し替え
 if(isExamWeek()){
   document.getElementById('week-grid').innerHTML=`
@@ -1622,6 +1644,28 @@ function isCampWeek(){
   // 8月第1週 かつ 合宿計画済み（見送りでない）
   return G.month === 8 && G.week === 1 && G._campPlan && !G._campPlan.skip;
 }
+function getCompThisWeek(){
+  if(!G || !G.divisionChosen) return null;
+  return (G.compSchedule||[]).find(s=>s.m===G.month && s.w===G.week && s.qualified && !s.done) || null;
+}
+function isCompWeek(){
+  return !!getCompThisWeek();
+}
+async function runCompWeek(){
+  const comp = getCompThisWeek();
+  if(!comp) return;
+
+  recalc();
+  const before = {skill:G.skill, ensemble:G.ensemble, song:G.song, morale:G.morale, funds:G.funds};
+
+  // runComp の処理を呼び出し（既存ロジックをそのまま使う）
+  runComp(comp.name, comp.m);
+
+  // 週を進める
+  selPracId = null;
+  if(G.week >= WEEKS_PER_MONTH){ G.week=1; G._pendingMonthAdvance=true; }
+  else { G.week++; }
+}
 function advanceWeek(){
 // ── 試験週チェック ──
 if(isExamWeek()){
@@ -1631,6 +1675,11 @@ if(isExamWeek()){
 // ── 合宿週チェック ──
 if(isCampWeek()){
   runCampWeek();
+  return;
+}
+// ── コンクール週チェック ──
+if(isCompWeek()){
+  runCompWeek();
   return;
 }
 recalc();
@@ -2232,12 +2281,6 @@ G.funds+=income-expense+featFundBonus;
 if(G.funds<0) G.funds=0;
 const featBonusStr=featFundBonus>0?` +${featFundBonus.toLocaleString()}円（特徴補助）`:'';
 addLog(`月次収支：+${income.toLocaleString()}円（部費）-${expense.toLocaleString()}円（固定費）${featBonusStr}`,'資金');
-if(G.divisionChosen){
-const comp=getCompThisMonth();
-if(comp){
-setTimeout(()=>runComp(comp.name,comp.m),300);
-}
-}
 if(G.month===4&&!G.divisionChosen){
 setTimeout(()=>openDivisionModal(),600);
 }
@@ -2250,7 +2293,7 @@ if(Math.random()<cfg2.auditRate&&!G.auditPending){
 G.auditPending=true;
 setTimeout(()=>triggerAuditEvent(),500);
 }
-const hasCompThisMonth=G.divisionChosen&&!!(G.compSchedule||[]).find(s=>s.m===G.month&&s.qualified);
+const hasCompThisMonth=G.divisionChosen&&!!(G.compSchedule||[]).find(s=>s.m===G.month&&s.qualified&&!s.done);
 if(!hasCompThisMonth){
 notif(MN[G.month],(MONTHLY_EVENTS[G.month]||[])[0]||'新しい月が始まりました');
 }
@@ -3087,83 +3130,102 @@ await generateJiyuKyoku();
 }
 }
 function monthEvent7(){
-// 7月：合宿計画会議 + コンクール直前の雰囲気
 // 合宿計画がまだなら計画を立てる
 if(!G._campPlan){
   setTimeout(()=>openCampPlanModal(), 600);
 }
-// コンクール直前の雰囲気
-const roll=Math.random();
-if(roll<0.50){
-  applyAll(G,{morale:4,skill:2});
-  showEventPopup('🔥','ライバル校の情報が入った',
-    '地区大会に出場するライバル校の演奏の噂が耳に入った。「負けたくない」という気持ちが部全体を引き締めた。','var(--amber)');
-  addLog('ライバル校情報入手。モチベーション向上。','イベント');
+const hasComp = !!(G.compSchedule||[]).find(s=>s.m===7&&s.qualified&&!s.done);
+if(hasComp){
+  // 大編成：地区大会（第4週）が迫っている
+  const roll=Math.random();
+  if(roll<0.50){
+    applyAll(G,{morale:5,skill:2});
+    showEventPopup('🔥','地区大会まであと1ヶ月',
+      '地区大会に出場するライバル校の演奏の噂が耳に入った。「負けたくない」という気持ちが部全体を引き締めた。第4週が本番だ、集中しよう。','var(--amber)');
+    addLog('ライバル校情報入手。モチベーション向上。','イベント');
+  } else {
+    applyAll(G,{morale:-2,skill:3});
+    showEventPopup('😰','地区大会直前の緊張',
+      '試験が終わり、いよいよ地区大会が近づいてきた。練習室の空気がぴりっと引き締まっている。緊張はあるが、音は確実に仕上がってきた。','var(--teal)');
+    addLog('地区大会直前期。緊張感の中で技術向上。','イベント');
+  }
 } else {
-  applyAll(G,{morale:-2,skill:3});
-  showEventPopup('😰','コンクール直前の緊張',
-    '試験が終わり、いよいよコンクールが近づいてきた。練習室の空気がぴりっと引き締まっている。緊張はあるが、音は確実に仕上がってきた。','var(--teal)');
-  addLog('コンクール直前期。緊張感の中で技術向上。','イベント');
+  // 非出場校：夏の練習モードへ切り替え
+  applyAll(G,{morale:3,stamina:2});
+  showEventPopup('☀️','夏の練習シーズンへ',
+    '期末試験が終わり、夏の練習モードに入った。コンクールには出ないが、定期演奏会や文化祭に向けて充実した練習を積んでいこう。','var(--gold)');
+  addLog('7月：夏の練習シーズン開始。','システム');
 }
 }
 function monthEvent8(){
-// 8月は夏休み期間：練習効果アップ・スタミナ消耗増のお知らせ
-// 合宿は第1週に自動実行（advanceWeek内で処理）
+// 8月：夏休み練習期間。合宿は第1週に自動実行。県大会は第2週。
 const campMsg=G._campPlan&&!G._campPlan.skip
-  ?`今週から合宿を実施します（${G._campPlan.theme.label}）。`
-  :G._campPlan?.skip?'今年の合宿は見送りです。':'合宿の計画がまだです。7月に計画を立ててください。';
-showEventPopup('☀️','夏休み練習期間スタート',
-  `夏休みに入り、練習時間がたっぷり取れます。\n練習効果が通常より高くなりますが、疲れも溜まりやすいです。\n${campMsg}`,'var(--gold)');
-addLog('夏休み練習期間開始。練習効果1.3倍・スタミナ消耗増。','システム');
+  ?`合宿（${G._campPlan.theme.label}）は第1週に実施します。`
+  :G._campPlan?.skip?'今年の合宿は見送りです。':'合宿の計画がまだです。';
+const hasComp = !!(G.compSchedule||[]).find(s=>s.m===8&&s.qualified&&!s.done);
+if(hasComp){
+  showEventPopup('🎺','夏本番・県大会月へ',
+    `夏休みに入り練習効果がアップします。${campMsg}\n県大会は第2週です。合宿で仕上げて、そのまま本番へ臨もう！`,'var(--gold)');
+  addLog('8月：夏休み練習期間・県大会月。練習効果1.3倍。','システム');
+} else {
+  showEventPopup('☀️','夏休み練習期間スタート',
+    `夏休みに入り、練習時間がたっぷり取れます。練習効果が通常より高くなりますが、疲れも溜まりやすいです。\n${campMsg}`,'var(--gold)');
+  addLog('夏休み練習期間開始。練習効果1.3倍・スタミナ消耗増。','システム');
+}
 }
 function monthEvent9(){
-// ── 文化祭演奏 ──
-const total=G.members.length;
-const festPrac=G._festivalPrac||0;
-// 人数による分岐
-const isSeparate=total>=80;  // 大会と文化祭を別メンバーで対応できる
-const isHard=total<55;       // 大編成基準を下回る
-
-// 演奏の質：文化祭練習回数・士気・スキルで決まる
-const quality=Math.min(100,
-  festPrac*15 + Math.round(G.skill*0.3) + Math.round(G.morale*0.2)
-);
-const isGood=quality>=50;
-
-// 効果適用
-if(isSeparate){
-  // 余裕あり：大会メンバーへの影響なし
-  applyAll(G,{morale:6,ens:3,stamina:-1});
-  showEventPopup('🎉','文化祭演奏（別メンバー対応）',
-    `80人超えの大所帯で大会メンバーと文化祭メンバーを分けて対応。余裕を持って${isGood?'好評の':''}演奏ができた。\n文化祭練習：${festPrac}週`,
-    'var(--green)');
-} else if(isHard){
-  // 全員参加で消耗大・コンクール曲に影響
-  applyAll(G,{morale:4,ens:2,stamina:-5});
-  // コンクール曲パラメーターに少しダメージ
-  ['kadaiParams','jiyuParams'].forEach(key=>{
-    if(!G[key]) return;
-    SONG_PARAMS.forEach(p=>{
-      G[key][p.key]=cap(G[key][p.key]-rnd(0,2));
-    });
-  });
-  showEventPopup('😓','文化祭演奏（全員掛け持ち・消耗）',
-    `部員数${total}人で文化祭も全員対応。スタミナを大きく消耗した。コンクール曲の仕上がりにも少し影響が出た。\n文化祭練習：${festPrac}週`,
-    'var(--amber)');
-  addLog('文化祭：人数不足で消耗。コンクール曲に影響。','イベント');
+const hasComp = !!(G.compSchedule||[]).find(s=>s.m===9&&s.qualified&&!s.done);
+if(hasComp){
+  // 支部大会出場校：県大会を突破した高揚感と次の緊張
+  const roll=Math.random();
+  if(roll<0.45){
+    applyAll(G,{morale:6,skill:2,ens:2});
+    showEventPopup('🏆','支部大会へ進出！',
+      '県大会を勝ち抜き、支部大会への切符を手にした。部員たちの目には自信と興奮が宿っている。第4週の本番に向けて、さらに磨きをかけよう。','var(--gold)');
+    addLog('支部大会出場決定。士気・技術向上。','イベント');
+  } else {
+    applyAll(G,{morale:3,skill:3});
+    showEventPopup('😤','支部大会へ向けて気を引き締める',
+      '県大会を突破したが、支部大会のライバルはさらに強い。「まだ終わっていない」——その緊張感が練習の質を引き上げている。','var(--teal)');
+    addLog('支部大会直前。緊張感の中で技術向上。','イベント');
+  }
+  // 文化祭は規模を縮小して対応
+  const festPrac=G._festivalPrac||0;
+  if(festPrac>0){
+    applyAll(G,{morale:2,stamina:-2});
+    addLog('文化祭も並行して対応。コンクールと両立。','イベント');
+  }
 } else {
-  // 55〜79人：掛け持ちで少し疲弊
-  applyAll(G,{morale:5,ens:2,stamina:-3});
-  showEventPopup('🎉',`文化祭演奏（掛け持ち・${isGood?'好評':'やや苦戦'}）`,
-    `大会メンバーと文化祭を同じメンバーでこなした。疲れはあるが、${isGood?'お客さんの反応は上々だった。':'次回に向けて文化祭曲の練習をもっと積みたい。'}\n文化祭練習：${festPrac}週`,
-    isGood?'var(--teal)':'var(--ink3)');
+  // ── 文化祭演奏（非出場校）──
+  const total=G.members.length;
+  const festPrac=G._festivalPrac||0;
+  const isSeparate=total>=80;
+  const isHard=total<55;
+  const quality=Math.min(100, festPrac*15+Math.round(G.skill*0.3)+Math.round(G.morale*0.2));
+  const isGood=quality>=50;
+  if(isSeparate){
+    applyAll(G,{morale:6,ens:3,stamina:-1});
+    showEventPopup('🎉','文化祭演奏（別メンバー対応）',
+      `80人超えの大所帯で文化祭メンバーを別途編成。余裕を持って${isGood?'好評の':''}演奏ができた。\n文化祭練習：${festPrac}週`,'var(--green)');
+  } else if(isHard){
+    applyAll(G,{morale:4,ens:2,stamina:-5});
+    ['kadaiParams','jiyuParams'].forEach(key=>{
+      if(!G[key]) return;
+      SONG_PARAMS.forEach(p=>{ G[key][p.key]=cap(G[key][p.key]-rnd(0,2)); });
+    });
+    showEventPopup('😓','文化祭演奏（全員掛け持ち・消耗）',
+      `部員数${total}人で文化祭も全員対応。スタミナを大きく消耗した。\n文化祭練習：${festPrac}週`,'var(--amber)');
+    addLog('文化祭：人数不足で消耗。','イベント');
+  } else {
+    applyAll(G,{morale:5,ens:2,stamina:-3});
+    showEventPopup('🎉',`文化祭演奏（${isGood?'好評':'やや苦戦'}）`,
+      `文化祭をこなした。疲れはあるが、${isGood?'お客さんの反応は上々だった。':'次回はもっと文化祭曲の練習を積みたい。'}\n文化祭練習：${festPrac}週`,
+      isGood?'var(--teal)':'var(--ink3)');
+  }
+  G._festivalQuality=quality;
+  addLog(`文化祭演奏終了（評価：${quality}点）`,'イベント');
 }
-
-// 翌年度入部者への影響を記録（quality値を保存）
-G._festivalQuality=quality;
-addLog(`文化祭演奏終了（出来映え評価：${quality}点）${isSeparate?'別メンバー対応':isHard?'全員掛け持ち':'掛け持ち'}`,'イベント');
-
-// アンコングループ編成も9月に
+// アンコングループ編成
 const groupCount=G.division==='large'?rnd(3,6):rnd(2,4);
 G.members.filter(m=>Math.random()<0.3).forEach(m=>{
   m.skill=cap(m.skill+rnd(1,2));
@@ -3172,7 +3234,22 @@ G.members.filter(m=>Math.random()<0.3).forEach(m=>{
 addLog(`アンコン${groupCount}グループ編成。`,'イベント');
 }
 function monthEvent10(){
-// 定期演奏会の準備と前売りチケット
+const hasComp = !!(G.compSchedule||[]).find(s=>s.m===10&&s.qualified&&!s.done);
+if(hasComp){
+  const isNational=(G.compSchedule||[]).find(s=>s.m===10&&s.qualified&&!s.done)?.name==='全国大会';
+  if(isNational){
+    applyAll(G,{morale:8,skill:3,ens:2});
+    showEventPopup('🏆','全国大会への切符',
+      '支部大会を制し、ついに全国大会への出場が決まった。この舞台に立てるのは全国でもごく一部の学校だけ。第4週、すべての練習の集大成を見せよう。','var(--gold)');
+    addLog('全国大会出場決定。士気・技術向上。','イベント');
+  } else {
+    applyAll(G,{morale:6,skill:2,ens:2});
+    showEventPopup('🌸','東日本大会へ',
+      '支部大会を突破し、東日本大会への出場が決まった。ここまで来られたのはチーム全員の努力の証。第4週、悔いのない演奏を。','var(--teal)');
+    addLog('東日本大会出場決定。士気・技術向上。','イベント');
+  }
+}
+// 定期演奏会の準備と前売りチケット（全校共通）
 const preTicket=rnd(1,3)*10000;
 const preSuccess=Math.random()<(G.morale/100*0.7+0.3);
 if(preSuccess){
@@ -3186,6 +3263,10 @@ if(preSuccess){
   showEventPopup('📋','定期演奏会の準備開始',
     '年末の定期演奏会に向けて選曲・パート割り当てが始まった。集客が課題になりそうだ。','var(--blue)');
   addLog('定期演奏会準備開始。集客に課題あり。','イベント');
+}
+// クリスマスコンサートの企画がまだなら計画を立てる
+if(!G._xmasPlan){
+  setTimeout(()=>openXmasPlanModal(), 900);
 }
 }
 function monthEvent11(){
