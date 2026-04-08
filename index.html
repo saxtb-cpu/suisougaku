@@ -303,19 +303,19 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div class="start-sec-title">難易度を選択</div>
 <div class="diff-grid">
 <button class="diff-btn sel" onclick="selDiff(this,'easy')">
-<div class="diff-name">弱小校</div>
+<div class="diff-name">大所帯校</div>
 <div class="diff-star" style="color:#3a7a50">★☆☆☆☆</div>
-<div class="diff-desc">部員少なめ<br>資金も限られる<br>成長の余地大</div>
+<div class="diff-desc">部員・資金が充実<br>土台がしっかり<br>まずはここから</div>
 </button>
 <button class="diff-btn" onclick="selDiff(this,'mid')">
-<div class="diff-name">中堅校</div>
+<div class="diff-name">標準校</div>
 <div class="diff-star" style="color:var(--gold)">★★★☆☆</div>
-<div class="diff-desc">バランス型<br>地区入賞が目標<br>標準的な部活</div>
+<div class="diff-desc">バランス型<br>じっくり育てる<br>標準的な部活</div>
 </button>
 <button class="diff-btn" onclick="selDiff(this,'hard')">
-<div class="diff-name">強豪校</div>
+<div class="diff-name">やりがい校</div>
 <div class="diff-star" style="color:var(--red)">★★★★★</div>
-<div class="diff-desc">人数・技術高め<br>全国前提の期待<br>ハイプレッシャー</div>
+<div class="diff-desc">少人数・資金難<br>工夫が問われる<br>上級者向け</div>
 </button>
 </div>
 <div class="start-sec-title">学校をランダム生成</div>
@@ -489,6 +489,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <div class="rp-lbl">今後の大会</div>
 <div id="rp-comps" style="font-size:11px;color:var(--ink2)"></div>
 </div>
+<div class="rp-sec">
+<div class="rp-lbl">楽器状態</div>
+<div id="rp-instruments" style="font-size:11px"></div>
+</div>
+<div class="rp-sec" id="rp-loans-sec" style="display:none">
+<div class="rp-lbl">ローン返済</div>
+<div id="rp-loans" style="font-size:11px;color:var(--ink2)"></div>
+</div>
 </aside>
 </div>
 </div>
@@ -500,11 +508,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 <button class="btn btn-sm" onclick="closeModal('ov-song-detail')" style="margin-top:14px;width:100%">閉じる</button>
 </div>
 </div>
-<div class="overlay" id="ov-xmas-plan">
-<div class="modal" style="max-width:460px;width:95vw;max-height:85vh;overflow-y:auto">
-<div style="font-family:var(--serif);font-size:17px;font-weight:800;margin-bottom:4px">🎄 クリスマスコンサートの企画</div>
-<div style="font-size:11px;color:var(--ink3);margin-bottom:14px">部長・幹部と相談してプログラムの方向性を決めてください（12月4週目に実施）</div>
-<div id="xmas-plan-body"></div>
+<div class="overlay" id="ov-budget">
+<div class="modal" style="max-width:480px;width:95vw;max-height:88vh;overflow-y:auto">
+<div style="font-family:var(--serif);font-size:17px;font-weight:800;margin-bottom:4px">📋 年度予算の設定</div>
+<div style="font-size:11px;color:var(--ink3);margin-bottom:14px">今年度の支出計画を立てましょう。楽器ローンもここから契約できます。</div>
+<div id="budget-body"></div>
 </div>
 </div>
 <div class="overlay" id="ov-camp-plan">

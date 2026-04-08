@@ -248,8 +248,8 @@ const COMP_T_LARGE={
 '支部大会（大編成）': {金:77,銀:63,銅:49,passLine:77,passCount:3},
 '全国大会':           {金:87,銀:75,銅:62,passLine:null,passCount:0},
 };
-const COMP_SCHEDULE_MID  =[{m:8,w:2,name:'県大会（中編成）'},{m:9,w:4,name:'支部大会（中編成）'},{m:10,w:4,name:'東日本大会'}];
-const COMP_SCHEDULE_LARGE=[{m:7,w:4,name:'地区大会（大編成）'},{m:8,w:2,name:'県大会（大編成）'},{m:9,w:4,name:'支部大会（大編成）'},{m:10,w:4,name:'全国大会'}];
+const COMP_SCHEDULE_MID  =[{m:8,name:'県大会（中編成）'},{m:9,name:'支部大会（中編成）'},{m:10,name:'東日本大会'}];
+const COMP_SCHEDULE_LARGE=[{m:7,name:'地区大会（大編成）'},{m:8,name:'県大会（大編成）'},{m:9,name:'支部大会（大編成）'},{m:10,name:'全国大会'}];
 const COMP_T={...({})}; // 動的に生成
 const MN={4:'4月',5:'5月',6:'6月',7:'7月',8:'8月',9:'9月',10:'10月',11:'11月',12:'12月',1:'1月',2:'2月',3:'3月'};
 const WEEKS_PER_MONTH=4;
@@ -374,8 +374,65 @@ const RAND_EVENTS=[
 {icon:'🥁',title:'ドラムが突然暴走',           body:'パーカッションが間違えて全力でドラムを叩き出した。一瞬静まり返った後、爆笑が起きた。',   col:'var(--amber)', fx:g=>{applyAll(g,{morale:8})}},
 {icon:'🌈',title:'虹が見えてテンションUP',     body:'練習の休憩中に綺麗な虹が出た。「これは吉兆だ！」と盛り上がり、午後の練習が冴えた。',   col:'var(--teal)',  fx:g=>{applyAll(g,{morale:8,stamina:3})}},
 ];
+// 楽器状態連動イベント（劣化時に高確率で発生）
+const INST_EVENTS={
+  small_warning:{icon:'⚠️',title:'楽器の調子が悪い',
+    body:'小型楽器のコンディションが落ちてきた。リードや管の詰まりなど細かい不具合が増えている。',
+    col:'var(--amber)',
+    fx:g=>{applyAll(g,{skill:-2,morale:-2});}},
+  small_broken:{icon:'🎷',title:'楽器の故障が相次ぐ',
+    body:'小型楽器の不具合が続出。修理に出す部員が増え、合奏への影響が出始めた。',
+    col:'var(--red)',
+    fx:g=>{
+      const cost=G.diff==='hard'?rnd(20000,40000):G.diff==='mid'?rnd(15000,25000):rnd(5000,15000);
+      g.funds=Math.max(0,g.funds-cost);
+      g._instruments.small=Math.min(100,g._instruments.small+30);
+      applyAll(g,{skill:-3,morale:-3});
+      addLog(`小型楽器修理費：-${cost.toLocaleString()}円`,'資金');
+    }},
+  large_warning:{icon:'⚠️',title:'大型楽器のコンディション低下',
+    body:'チューバやユーフォニアムの鳴りが悪くなってきた。早めのメンテナンスが必要だ。',
+    col:'var(--amber)',
+    fx:g=>{applyAll(g,{skill:-2});}},
+  large_broken:{icon:'🎺',title:'大型楽器が修理必要に',
+    body:'チューバ・ユーフォニアムに重大な不具合。修理に出さなければ演奏への影響が大きい。',
+    col:'var(--red)',
+    fx:g=>{
+      const cost=rnd(30000,60000);
+      g.funds=Math.max(0,g.funds-cost);
+      g._instruments.large=Math.min(100,g._instruments.large+35);
+      applyAll(g,{skill:-3});
+      addLog(`大型楽器修理費：-${cost.toLocaleString()}円`,'資金');
+    }},
+  percussion_warning:{icon:'⚠️',title:'打楽器のメンテが必要',
+    body:'スネアのヘッドが傷んできた。シンバルの鳴りも以前より落ちた気がする。',
+    col:'var(--amber)',
+    fx:g=>{applyAll(g,{ens:-2});}},
+  percussion_broken:{icon:'🥁',title:'打楽器の修理・交換が必要',
+    body:'ドラムヘッドの破れ、シンバルのひび割れ。放置するわけにはいかない。',
+    col:'var(--red)',
+    fx:g=>{
+      const cost=rnd(25000,50000);
+      g.funds=Math.max(0,g.funds-cost);
+      g._instruments.percussion=Math.min(100,g._instruments.percussion+35);
+      applyAll(g,{ens:-3,morale:-2});
+      addLog(`打楽器修理・交換費：-${cost.toLocaleString()}円`,'資金');
+    }},
+};
+
 function pickWeightedEvent(){
 const pool=RAND_EVENTS.filter(e=>!e.diff||e.diff.includes(G.diff));
+// 楽器状態が悪い場合、楽器イベントを高確率で追加
+const inst=G._instruments||{small:100,large:100,percussion:100};
+const instPool=[];
+if(inst.small<30)      instPool.push(INST_EVENTS.small_broken);
+else if(inst.small<60) instPool.push(INST_EVENTS.small_warning);
+if(inst.large<30)      instPool.push(INST_EVENTS.large_broken);
+else if(inst.large<60) instPool.push(INST_EVENTS.large_warning);
+if(inst.percussion<30)      instPool.push(INST_EVENTS.percussion_broken);
+else if(inst.percussion<60) instPool.push(INST_EVENTS.percussion_warning);
+// 楽器イベントを30%の確率で優先発生
+if(instPool.length>0 && Math.random()<0.30) return pick(instPool);
 return pick(pool);
 }
 let G={};
@@ -531,16 +588,18 @@ m.skill = cap(m.skill - rnd(1,3));
 }
 const DIFF={
 easy:{
-memMin:18,memMax:30,skillBase:14,skillRng:28,funds:180000,moraleBase:62,label:'弱小校',compMod:1.0,
-duesPerMember:1500,   // 月額部費（円/人）
-monthlyFixed:40000,   // 毎月の固定費（施設・楽器維持等）
-parentReaction:0.7,   // 部費値上げへの保護者反発率（0〜1）
-conflictRate:0.05,    // 部員いざこざ発生率
-auditRate:0.0,        // オーディション発生率
-diffNote:'資金繰りが厳しく、部費値上げは保護者の反発を招きやすい。',
+// 大所帯校：人数・資金・技術が豊富。管理は賑やかだが土台がしっかりしている
+memMin:53,memMax:78,skillBase:48,skillRng:30,/*funds:700000,*/moraleBase:70,label:'大所帯校',compMod:1.05,
+duesPerMember:5500,
+monthlyFixed:80000,
+parentReaction:0.1,
+conflictRate:0.10,   // 人数は多いがベテランが支える
+auditRate:0.15,
+diffNote:'人数・資金・技術が最初から揃っている。土台が安定しているので成果を出しやすい。',
 },
 mid:{
-memMin:32,memMax:52,skillBase:28,skillRng:30,funds:400000,moraleBase:70,label:'中堅校',compMod:0.97,
+// 標準校：バランス型。じっくり育てる楽しさがある
+memMin:32,memMax:52,skillBase:28,skillRng:30,/*funds:400000,*/moraleBase:68,label:'標準校',compMod:1.00,
 duesPerMember:3000,
 monthlyFixed:55000,
 parentReaction:0.35,
@@ -549,13 +608,14 @@ auditRate:0.0,
 diffNote:'資金・技術ともにバランスが良い。着実な成長が見込める。',
 },
 hard:{
-memMin:53,memMax:78,skillBase:48,skillRng:30,funds:700000,moraleBase:65,label:'強豪校',compMod:0.93,
-duesPerMember:5500,
-monthlyFixed:80000,
-parentReaction:0.1,
-conflictRate:0.22,   // 人数が多いため高め
-auditRate:0.4,       // オーディション定期発生
-diffNote:'資金・人材は豊富だが、部員間の競争・いざこざが多い。',
+// やりがい校：少人数・資金難。工夫次第でどこまでも伸びる
+memMin:18,memMax:30,skillBase:14,skillRng:28,/*funds:180000,*/moraleBase:62,label:'やりがい校',compMod:0.93,
+duesPerMember:1500,
+monthlyFixed:40000,
+parentReaction:0.7,
+conflictRate:0.05,   // 人数が少ないため摩擦は少ない
+auditRate:0.0,
+diffNote:'資金繰りが厳しく、少人数での戦いになる。工夫と成長の物語が待っている。',
 },
 };
 function calcSongGain(pracTag, effectiveFx){
@@ -751,7 +811,7 @@ skill:0,ensemble:0,song:0,morale:cfg.moraleBase,
 // 曲パラメーター（課題曲・自由曲それぞれ5軸）
 kadaiParams:newSongParams(0),
 jiyuParams:newSongParams(0),
-funds:cfg.funds,
+funds:members.length * 2000,
 dues:cfg.duesPerMember,      // 現在の月額部費
 members,captain:null,execs:[],
 division:null,               // 'mid'=中編成 / 'large'=大編成 (4月に選択)
@@ -778,6 +838,9 @@ sectionalDebt:0,         // パート練習不足カウント
 _springConcert:null,     // 春季演奏会の開催決定（null=未決定, true=開催, false=見送り）
 _campPlan:null,          // 合宿計画（null=未計画, {theme,cost}=計画済み）
 _festivalPrac:0,         // 文化祭曲練習の累積週数
+_budget:null,            // 年度予算（null=未設定）
+_instruments:{small:100,large:100,percussion:100}, // 楽器状態（0〜100）
+_loans:[],               // ローン返済リスト [{name,monthly,remaining,total}]
 feats:schoolData.feats||[], // 学校の特徴
 };
 // 学校特徴ボーナスを部員に適用
@@ -997,6 +1060,16 @@ if(_lowMRatio>=0.40) alerts.push(`<div style="background:var(--red2);border:1px 
 else if(_lowMRatio>=0.25) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">😞 <strong>士気低下が広がっています</strong>　低士気部員：${_lowMCount}人 → メンタル強化か個別ケアを</div>`);
 else if(_lowMRatio>=0.15) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">⚠️ <strong>落ち込んでいる部員がいます</strong>　士気の低い子が${_lowMCount}人います</div>`);
 if(G.sectionalDebt>=3) alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">⚠️ <strong>パート練習不足</strong>　→ パート練習でクオリティを高めましょう</div>`);
+// 楽器状態アラート
+const inst=G._instruments||{small:100,large:100,percussion:100};
+if(inst.small<30||inst.large<30||inst.percussion<30){
+  const bad=[inst.small<30?'小型楽器':'',inst.large<30?'大型楽器':'',inst.percussion<30?'打楽器':''].filter(Boolean).join('・');
+  alerts.push(`<div style="background:var(--red2);border:1px solid var(--red);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--red);margin-bottom:4px">🔧 <strong>${bad}が限界</strong>　修理・交換が必要です。スコアに影響しています。</div>`);
+} else if(inst.small<60||inst.large<60||inst.percussion<60){
+  const warn=[inst.small<60?'小型楽器':'',inst.large<60?'大型楽器':'',inst.percussion<60?'打楽器':''].filter(Boolean).join('・');
+  alerts.push(`<div style="background:var(--amber2);border:1px solid var(--amber);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--amber);margin-bottom:4px">⚠️ <strong>${warn}の状態が低下</strong>　予算でメンテナンス積立を増やしましょう。</div>`);
+}
+if(!G._budget&&G.year>=2) alerts.push(`<div style="background:var(--blue2);border:1px solid var(--blue);border-radius:7px;padding:7px 12px;font-size:11px;color:var(--blue);margin-bottom:4px">📋 <strong>年度予算が未設定</strong>　<button onclick="openBudgetModal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:700;padding:0">→ 予算を設定する</button></div>`);
 alertBar.innerHTML=alerts.join('');
 }
 document.getElementById('rp-month').textContent=MN[G.month];
@@ -1363,7 +1436,7 @@ const isC=m===G.month,isPast=i<ci;
 return `<div class="sch-m ${isC?'cur':''} ${isPast?'past':''}" onclick="showSchD(${m})">
 <div class="sch-lbl">${MN[m]}</div><div class="sch-num">${m}</div>
 <div class="sch-ev">
-${(G.compSchedule||[]).find(s=>s.m===m)?`<div><span class="ev-dot" style="background:var(--gold)"></span>${(G.compSchedule.find(s=>s.m===m)||{}).name||'大会'}（第${(G.compSchedule.find(s=>s.m===m)||{}).w||'?'}週）</div>`:''}
+${(G.compSchedule||[]).find(s=>s.m===m)?`<div><span class="ev-dot" style="background:var(--gold)"></span>${(G.compSchedule.find(s=>s.m===m)||{}).name||'大会'}</div>`:''}
 ${(MONTHLY_EVENTS[m]||[]).slice(0,1).map(e=>`<div><span class="ev-dot" style="background:var(--blue)"></span>${e}</div>`).join('')}
 </div></div>`;
 }).join('');
@@ -1372,7 +1445,7 @@ function showSchD(m){
 const evs=MONTHLY_EVENTS[m]||[];
 let h=`<strong>${MN[m]}のイベント</strong><br><br>`;
 const compEntry=(G.compSchedule||[]).find(s=>s.m===m);
-if(compEntry)h+=`<div style="color:var(--gold);margin-bottom:5px">🏆 ${compEntry.name}（第${compEntry.w||'?'}週）</div>`;
+if(compEntry)h+=`<div style="color:var(--gold);margin-bottom:5px">🏆 ${compEntry.name}</div>`;
 h+=evs.map(e=>`<div style="margin-bottom:3px">• ${e}</div>`).join('');
 document.getElementById('sch-detail').innerHTML=h;
 }
@@ -1392,8 +1465,43 @@ document.getElementById('rp-comps').innerHTML='<span style="color:var(--amber)">
 } else {
 const upcoming=(G.compSchedule||[]).filter(s=>s.qualified&&!s.done).slice(0,3);
 document.getElementById('rp-comps').innerHTML=upcoming.map(s=>
-`<div style="margin-bottom:4px"><span style="color:var(--gold)">▶</span> ${s.m}月第${s.w||'?'}週 <span style="font-size:11px">${s.name}</span></div>`).join('')
+`<div style="margin-bottom:4px"><span style="color:var(--gold)">▶</span> ${s.m}月 <span style="font-size:11px">${s.name}</span></div>`).join('')
 ||'<span style="color:var(--ink3)">今クール終了</span>';
+}
+// 楽器状態
+const instEl=document.getElementById('rp-instruments');
+if(instEl){
+  const inst=G._instruments||{small:100,large:100,percussion:100};
+  const instBar=(v,label)=>{
+    const col=v>=70?'var(--green)':v>=40?'var(--amber)':'var(--red)';
+    const warn=v<40?'⚠ ':'';
+    return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+      <span style="font-size:10px;color:var(--ink3);width:52px">${label}</span>
+      <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+        <div style="width:${v}%;height:100%;background:${col};border-radius:3px"></div>
+      </div>
+      <span style="font-size:10px;font-weight:700;color:${col};width:28px;text-align:right">${warn}${v}</span>
+    </div>`;
+  };
+  instEl.innerHTML=
+    instBar(inst.small,'小型')+
+    instBar(inst.large,'大型')+
+    instBar(inst.percussion,'打楽器')+
+    `<button onclick="openBudgetModal()" style="margin-top:4px;font-size:10px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0">📋 予算・ローンを見る</button>`;
+}
+// ローン
+const loans=G._loans||[];
+const loanSec=document.getElementById('rp-loans-sec');
+const loanEl=document.getElementById('rp-loans');
+if(loanSec&&loanEl){
+  if(loans.length>0){
+    loanSec.style.display='block';
+    loanEl.innerHTML=loans.map(l=>
+      `<div style="margin-bottom:3px">${l.name}<br><span style="color:var(--ink3)">残${l.remaining.toLocaleString()}円（月${l.monthly.toLocaleString()}円）</span></div>`
+    ).join('');
+  } else {
+    loanSec.style.display='none';
+  }
 }
 }
 function renderCaptain(){
@@ -1522,28 +1630,6 @@ if(isCampWeek()){
   document.getElementById('sel-prac-name').textContent='合宿週（自動実行）';
   return;
 }
-// コンクール週は練習グリッドを差し替え
-if(isCompWeek()){
-  const comp=getCompThisWeek();
-  const tbl=getCompTable();
-  const t=tbl[comp.name];
-  const pred=calcScore();
-  const predResult=t?(pred>=t.金?'金賞圏内！':pred>=t.銀?'銀賞ライン':pred>=t.銅?'銅賞ライン':'入賞ライン以下'):'';
-  const isNational=comp.name.includes('全国')||comp.name.includes('東日本');
-  const bgCol=isNational?'var(--gold3)':'var(--blue2)';
-  const bdCol=isNational?'var(--gold)':'var(--blue)';
-  const txCol=isNational?'var(--gold)':'var(--blue)';
-  document.getElementById('week-grid').innerHTML=`
-    <div style="grid-column:1/-1;background:${bgCol};border:1.5px solid ${bdCol};border-radius:10px;padding:18px;text-align:center">
-      <div style="font-size:28px;margin-bottom:8px">${isNational?'🏆':'🎺'}</div>
-      <div style="font-family:var(--serif);font-size:16px;font-weight:800;color:${txCol};margin-bottom:6px">${comp.name}</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">今週は本番当日です。練習の成果を発揮しよう！</div>
-      ${t?`<div style="font-size:11px;color:var(--ink3)">予測スコア：<strong style="color:${txCol}">${pred}点</strong>　→　${predResult}<br>金賞：${t.金}点 ／ 銀賞：${t.銀}点 ／ 銅賞：${t.銅}点</div>`:''}
-    </div>`;
-  document.getElementById('prac-preview').style.display='none';
-  document.getElementById('sel-prac-name').textContent='コンクール当日（自動実行）';
-  return;
-}
 // 試験週は練習グリッドを差し替え
 if(isExamWeek()){
   document.getElementById('week-grid').innerHTML=`
@@ -1644,28 +1730,6 @@ function isCampWeek(){
   // 8月第1週 かつ 合宿計画済み（見送りでない）
   return G.month === 8 && G.week === 1 && G._campPlan && !G._campPlan.skip;
 }
-function getCompThisWeek(){
-  if(!G || !G.divisionChosen) return null;
-  return (G.compSchedule||[]).find(s=>s.m===G.month && s.w===G.week && s.qualified && !s.done) || null;
-}
-function isCompWeek(){
-  return !!getCompThisWeek();
-}
-async function runCompWeek(){
-  const comp = getCompThisWeek();
-  if(!comp) return;
-
-  recalc();
-  const before = {skill:G.skill, ensemble:G.ensemble, song:G.song, morale:G.morale, funds:G.funds};
-
-  // runComp の処理を呼び出し（既存ロジックをそのまま使う）
-  runComp(comp.name, comp.m);
-
-  // 週を進める
-  selPracId = null;
-  if(G.week >= WEEKS_PER_MONTH){ G.week=1; G._pendingMonthAdvance=true; }
-  else { G.week++; }
-}
 function advanceWeek(){
 // ── 試験週チェック ──
 if(isExamWeek()){
@@ -1675,11 +1739,6 @@ if(isExamWeek()){
 // ── 合宿週チェック ──
 if(isCampWeek()){
   runCampWeek();
-  return;
-}
-// ── コンクール週チェック ──
-if(isCompWeek()){
-  runCompWeek();
   return;
 }
 recalc();
@@ -2280,7 +2339,51 @@ const featFundBonus=(G.feats||[]).reduce((sum,feat)=>{
 G.funds+=income-expense+featFundBonus;
 if(G.funds<0) G.funds=0;
 const featBonusStr=featFundBonus>0?` +${featFundBonus.toLocaleString()}円（特徴補助）`:'';
+
+// ── ローン返済 ──
+if(G._loans&&G._loans.length>0){
+  let loanTotal=0;
+  G._loans=G._loans.filter(loan=>{
+    const pay=Math.min(loan.monthly,loan.remaining);
+    G.funds=Math.max(0,G.funds-pay);
+    loan.remaining-=pay;
+    loanTotal+=pay;
+    return loan.remaining>0;
+  });
+  if(loanTotal>0) addLog(`ローン返済：-${loanTotal.toLocaleString()}円`,'資金');
+}
+
+// ── 楽器の自然劣化 ──
+if(!G._instruments) G._instruments={small:100,large:100,percussion:100};
+const smallCount=G.members.filter(m=>['フルート','クラリネット','サックス','トランペット','トロンボーン','ホルン','オーボエ'].includes(m.part)).length;
+const largeCount=G.members.filter(m=>['チューバ','ユーフォニアム'].includes(m.part)).length;
+const percCount =G.members.filter(m=>m.part==='打楽器').length;
+// 小型：やりがい校は部が負担するので劣化が目立つ、大所帯は個人持ちなので影響軽微
+// 予算のメンテ積立が劣化を抑制（月1万円ごとに劣化-1）
+const maintBudget=G._budget?.maintenance||0;
+const maintBonus=Math.floor(maintBudget/10000);
+const smallDeg = Math.max(0, (G.diff==='hard' ? Math.round(smallCount*0.6+rnd(1,3))
+               : G.diff==='mid'  ? Math.round(smallCount*0.3+rnd(1,2))
+               :                   rnd(1,2)) - maintBonus);
+const largeDeg = Math.max(0, Math.round(largeCount*0.8+rnd(1,3)) - maintBonus);
+const percDeg  = Math.max(0, Math.round(percCount *0.9+rnd(1,3)) - maintBonus);
+G._instruments.small     =Math.max(0, G._instruments.small     - smallDeg);
+G._instruments.large     =Math.max(0, G._instruments.large     - largeDeg);
+G._instruments.percussion=Math.max(0, G._instruments.percussion- percDeg);
+// メンテ費を実際に引き落とし（月割り）
+if(maintBudget>0){
+  const monthlyMaint=Math.round(maintBudget/12);
+  G.funds=Math.max(0,G.funds-monthlyMaint);
+  addLog(`楽器メンテ積立：-${monthlyMaint.toLocaleString()}円`,'資金');
+}
+
 addLog(`月次収支：+${income.toLocaleString()}円（部費）-${expense.toLocaleString()}円（固定費）${featBonusStr}`,'資金');
+if(G.divisionChosen){
+const comp=getCompThisMonth();
+if(comp){
+setTimeout(()=>runComp(comp.name,comp.m),300);
+}
+}
 if(G.month===4&&!G.divisionChosen){
 setTimeout(()=>openDivisionModal(),600);
 }
@@ -2293,7 +2396,7 @@ if(Math.random()<cfg2.auditRate&&!G.auditPending){
 G.auditPending=true;
 setTimeout(()=>triggerAuditEvent(),500);
 }
-const hasCompThisMonth=G.divisionChosen&&!!(G.compSchedule||[]).find(s=>s.m===G.month&&s.qualified&&!s.done);
+const hasCompThisMonth=G.divisionChosen&&!!(G.compSchedule||[]).find(s=>s.m===G.month&&s.qualified);
 if(!hasCompThisMonth){
 notif(MN[G.month],(MONTHLY_EVENTS[G.month]||[])[0]||'新しい月が始まりました');
 }
@@ -2325,13 +2428,14 @@ G.sectionalDebt=0;
 G._springConcert=null;
 G._campPlan=null;
 G._festivalPrac=0;
+G._budget=null; // 予算は年度ごとに再設定
 G._monthEventDone={};
 if(prevCaptainGrad){G.captain=null;addLog('部長が卒業しました。新部長を2〜3月に選出してください。','システム');}
 const hasComp=G.compHistory.some(c=>c.year===G.year-1);
 const hasGold=G.compHistory.some(c=>c.year===G.year-1&&c.result==='金賞');
 const hasNatGold=G.compHistory.some(c=>c.year===G.year-1&&(c.name==='全国大会'||c.name==='東日本大会')&&c.result==='金賞');
 const hasPrefGold=G.compHistory.some(c=>c.year===G.year-1&&c.name.includes('支部')&&c.result==='金賞');
-const base=DIFF[G.diff].memMin===18?rnd(6,12):DIFF[G.diff].memMin===32?rnd(10,18):rnd(14,24);
+const base=G.diff==='hard'?rnd(6,12):G.diff==='mid'?rnd(10,18):rnd(14,24);
 const bonus=hasNatGold?12:hasPrefGold?9:hasGold?6:hasComp?3:0;
 // 文化祭の出来映えボーナス
 const festBonus=G._festivalQuality>=80?3:G._festivalQuality>=60?2:G._festivalQuality>=40?1:0;
@@ -2406,8 +2510,12 @@ const shirkerPenalty=(G.shirkerIds&&G.shirkerIds.length>0)?(G.shirkerIds.length*
 const sectDebtPenalty=Math.min(8,(G.sectionalDebt||0)*1.5);
 const boredomPenalty=Math.min(5,(G.songBoredom||0)*1.2);
 const luck=(Math.random()-.5)*8;
-const mod={easy:1.0,mid:.97,hard:.93}[G.diff]||1;
-return Math.round((base+captainBonus+plBonus-countPenalty-conflictPenalty-shirkerPenalty-sectDebtPenalty-boredomPenalty)*mod+luck);
+// 楽器状態ペナルティ
+const inst=G._instruments||{small:100,large:100,percussion:100};
+const instAvg=(inst.small+inst.large+inst.percussion)/3;
+const instPenalty=instAvg<40?Math.round((40-instAvg)*0.3):instAvg<70?Math.round((70-instAvg)*0.1):0;
+const mod=DIFF[G.diff]?.compMod||1.0;
+return Math.round((base+captainBonus+plBonus-countPenalty-conflictPenalty-shirkerPenalty-sectDebtPenalty-boredomPenalty-instPenalty)*mod+luck);
 }
 function runComp(name,month){
 G.achievements.firstContest=true;
@@ -2682,11 +2790,159 @@ function monthEvent4(){
 if(G.year===1) return; // 1年目は enterGame で対応済み
 showEventPopup('🌸','入学式シーズン',
 '新入生が入学し、部活への見学者が増えた。部員募集のチャンスだ。','var(--rose)');
+// 年度予算の設定を促す
+if(!G._budget){
+  setTimeout(()=>openBudgetModal(), 800);
+}
 }
 
 // ================================================================
-// 合宿計画システム
+// 年度予算・楽器ローンシステム
 // ================================================================
+const INSTRUMENT_LOANS=[
+  {id:'tuba',      icon:'🎺', name:'チューバ（新品）',      price:1200000, monthly:30000, months:40, skillBonus:4, target:'large'},
+  {id:'tuba_used', icon:'🎺', name:'チューバ（中古）',       price:500000,  monthly:15000, months:36, skillBonus:2, target:'large'},
+  {id:'euph',      icon:'🎵', name:'ユーフォニアム（新品）', price:800000,  monthly:22000, months:36, skillBonus:3, target:'large'},
+  {id:'marimba',   icon:'🥁', name:'マリンバ（新品）',       price:900000,  monthly:25000, months:36, skillBonus:3, target:'percussion'},
+  {id:'timpani',   icon:'🥁', name:'ティンパニ（新品）',     price:600000,  monthly:18000, months:34, skillBonus:2, target:'percussion'},
+  {id:'snareset',  icon:'🥁', name:'スネア一式（新品）',     price:300000,  monthly:10000, months:30, skillBonus:2, target:'percussion'},
+];
+
+// 予算カテゴリ定義
+const BUDGET_CATS=[
+  {k:'maintenance', label:'楽器メンテナンス積立', icon:'🔧',
+   desc:'楽器の定期メンテ・消耗品費。積んだ分だけ楽器状態の劣化を抑制。',
+   minRec: g=>g.diff==='hard'?30000:g.diff==='mid'?20000:15000},
+  {k:'competition', label:'コンクール遠征費積立', icon:'🏆',
+   desc:'参加費・交通費・宿泊費。不足すると士気ペナルティあり。',
+   minRec: g=>g.members.length*800},
+  {k:'concert',     label:'演奏会準備費',         icon:'🎭',
+   desc:'定期演奏会・クリスマスコンサートの会場費等の積立。',
+   minRec: g=>g.diff==='hard'?40000:g.diff==='mid'?60000:90000},
+  {k:'reserve',     label:'緊急修理・予備費',     icon:'💰',
+   desc:'突発的な楽器故障や予期せぬ出費に備える。',
+   minRec: _=>20000},
+];
+
+function openBudgetModal(){
+  const el=document.getElementById('budget-body');
+  if(!el) return;
+  const totalFunds=G.funds;
+  const loans=G._loans||[];
+  const loanMonthly=loans.reduce((s,l)=>s+l.monthly,0);
+
+  // 推奨額を計算
+  const recs={};
+  let recTotal=0;
+  BUDGET_CATS.forEach(c=>{recs[c.k]=c.minRec(G); recTotal+=recs[c.k];});
+
+  // 現在の予算があれば初期値に使う、なければ推奨額
+  const cur=G._budget||{};
+
+  let html=`
+    <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">
+      現在の資金：<strong style="color:var(--gold)">${totalFunds.toLocaleString()}円</strong>
+      ${loanMonthly>0?`　ローン返済：<strong style="color:var(--red)">月${loanMonthly.toLocaleString()}円</strong>`:''}
+      <br><span style="font-size:10px;color:var(--ink3)">各項目に今年度の予算を割り当ててください（資金から実際に引き落とされるのは使用時です）</span>
+    </div>
+    <div id="budget-inputs">`;
+
+  BUDGET_CATS.forEach(c=>{
+    const val=cur[c.k]||recs[c.k];
+    html+=`
+      <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span>${c.icon}</span>
+          <span style="font-size:12px;font-weight:700;flex:1">${c.label}</span>
+          <span style="font-size:10px;color:var(--ink3)">推奨：${recs[c.k].toLocaleString()}円</span>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px">${c.desc}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="adjBudget('${c.k}',-10000)" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px">−</button>
+          <strong id="bv-${c.k}" style="font-size:13px;min-width:80px;text-align:center">${val.toLocaleString()}円</strong>
+          <button onclick="adjBudget('${c.k}',10000)" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px">＋</button>
+        </div>
+      </div>`;
+  });
+
+  html+=`</div>
+    <div style="margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:12px">
+      合計：<strong id="budget-total">${Object.values(cur).reduce((a,b)=>a+b,0)||recTotal}</strong>円
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px">🎺 楽器ローン（任意）</div>
+      <div style="font-size:10px;color:var(--ink3);margin-bottom:8px">大型楽器・打楽器を分割払いで導入できます。購入直後から演奏力ボーナス。</div>
+      ${INSTRUMENT_LOANS.map(l=>{
+        const already=loans.find(x=>x.id===l.id);
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg4)">
+          <span style="font-size:14px">${l.icon}</span>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700">${l.name}</div>
+            <div style="font-size:10px;color:var(--ink3)">月${l.monthly.toLocaleString()}円×${l.months}回 / 技術+${l.skillBonus}</div>
+          </div>
+          ${already
+            ? `<span style="font-size:10px;color:var(--teal)">返済中（残${already.remaining.toLocaleString()}円）</span>`
+            : `<button onclick="takeLoan('${l.id}')" style="background:var(--blue2);border:1px solid var(--blue);border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;color:var(--blue)">契約</button>`
+          }
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-gold" style="flex:1" onclick="decideBudget()">✓ 予算を決定する</button>
+      <button class="btn btn-sm" onclick="closeModal('ov-budget')">後で</button>
+    </div>`;
+
+  // 現在値を_tmpBudgetに保持
+  if(!G._tmpBudget){
+    G._tmpBudget={};
+    BUDGET_CATS.forEach(c=>G._tmpBudget[c.k]=cur[c.k]||recs[c.k]);
+  }
+  el.innerHTML=html;
+  updateBudgetTotal();
+  document.getElementById('ov-budget').classList.add('show');
+}
+
+function adjBudget(key, delta){
+  if(!G._tmpBudget) G._tmpBudget={};
+  G._tmpBudget[key]=Math.max(0,(G._tmpBudget[key]||0)+delta);
+  const el=document.getElementById('bv-'+key);
+  if(el) el.textContent=G._tmpBudget[key].toLocaleString()+'円';
+  updateBudgetTotal();
+}
+
+function updateBudgetTotal(){
+  const total=BUDGET_CATS.reduce((s,c)=>s+(G._tmpBudget?.[c.k]||0),0);
+  const el=document.getElementById('budget-total');
+  if(el){
+    el.textContent=total.toLocaleString();
+    el.style.color=total>G.funds?'var(--red)':'var(--ink)';
+  }
+}
+
+function decideBudget(){
+  G._budget=Object.assign({},G._tmpBudget);
+  G._tmpBudget=null;
+  closeModal('ov-budget');
+  addLog(`年度予算設定：メンテ${(G._budget.maintenance||0).toLocaleString()}円・遠征${(G._budget.competition||0).toLocaleString()}円・演奏会${(G._budget.concert||0).toLocaleString()}円・予備${(G._budget.reserve||0).toLocaleString()}円`,'資金');
+  notif('予算設定完了','年度予算を設定しました。楽器状態のケアを忘れずに！');
+}
+
+function takeLoan(loanId){
+  const def=INSTRUMENT_LOANS.find(l=>l.id===loanId);
+  if(!def) return;
+  if((G._loans||[]).find(l=>l.id===loanId)){notif('契約済み','すでに返済中のローンです');return;}
+  if(!G._loans) G._loans=[];
+  G._loans.push({id:def.id, name:def.name, monthly:def.monthly, remaining:def.price, total:def.price});
+  // 即時ボーナス（楽器状態改善 + スキルボーナス）
+  if(def.target==='large') G._instruments.large=Math.min(100,G._instruments.large+40);
+  if(def.target==='percussion') G._instruments.percussion=Math.min(100,G._instruments.percussion+40);
+  G.members.forEach(m=>m.skill=cap(m.skill+def.skillBonus));
+  addLog(`楽器ローン契約：「${def.name}」月${def.monthly.toLocaleString()}円×${def.months}回`,'資金');
+  notif('ローン契約',`「${def.name}」を導入！月${def.monthly.toLocaleString()}円の返済が始まります`);
+  // モーダルを再描画
+  G._tmpBudget=null;
+  openBudgetModal();
+}
 const CAMP_THEMES = [
   {
     id:'basic',
@@ -2721,7 +2977,7 @@ const CAMP_THEMES = [
 function openCampPlanModal(){
   const cap_=G.captain;
   const execs=G.execs||[];
-  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  const cost=G.diff==='easy'?120000:G.diff==='mid'?90000:60000;
   const hasCampBonus=(G.feats||[]).some(f=>FEAT_BONUS[f]&&FEAT_BONUS[f].campBonus);
   const el=document.getElementById('camp-plan-body');
   if(!el) return;
@@ -2760,7 +3016,7 @@ function selectCampTheme(themeId){
   });
   const el=document.getElementById('camp-theme-'+themeId);
   if(el){ el.style.borderColor='var(--teal)'; el.style.background='var(--teal2)'; }
-  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  const cost=G.diff==='easy'?120000:G.diff==='mid'?90000:60000;
   decideCamp(themeId);
 }
 
@@ -2773,7 +3029,7 @@ function decideCamp(themeId){
     return;
   }
   const theme=CAMP_THEMES.find(t=>t.id===themeId);
-  const cost=G.diff==='easy'?60000:G.diff==='mid'?90000:120000;
+  const cost=G.diff==='easy'?120000:G.diff==='mid'?90000:60000;
   G._campPlan={themeId, theme, cost};
   notif('合宿計画決定',`「${theme.label}」で合宿を計画しました！8月第1週に実施します🏕️`);
   addLog(`合宿計画：「${theme.label}」（費用：${cost.toLocaleString()}円）`,'イベント');
@@ -3096,10 +3352,10 @@ const audience = Math.max(20, baseAudience
   + Math.round((avgSkill-40)*0.8)
   + Math.round((avgMorale-50)*0.5)
   + rnd(-15,20));
-const ticketPrice = G.diff==='easy' ? 500 : G.diff==='mid' ? 700 : 1000;
+const ticketPrice = G.diff==='easy' ? 1000 : G.diff==='mid' ? 700 : 500;
 const income = audience * ticketPrice;
 // 支出：会場費
-const cost = G.diff==='easy' ? 25000 : G.diff==='mid' ? 40000 : 65000;
+const cost = G.diff==='easy' ? 65000 : G.diff==='mid' ? 40000 : 25000;
 const net = income - cost;
 G.funds += net;
 // 演奏の出来で士気・アンサンブルが変わる
@@ -3130,102 +3386,83 @@ await generateJiyuKyoku();
 }
 }
 function monthEvent7(){
+// 7月：合宿計画会議 + コンクール直前の雰囲気
 // 合宿計画がまだなら計画を立てる
 if(!G._campPlan){
   setTimeout(()=>openCampPlanModal(), 600);
 }
-const hasComp = !!(G.compSchedule||[]).find(s=>s.m===7&&s.qualified&&!s.done);
-if(hasComp){
-  // 大編成：地区大会（第4週）が迫っている
-  const roll=Math.random();
-  if(roll<0.50){
-    applyAll(G,{morale:5,skill:2});
-    showEventPopup('🔥','地区大会まであと1ヶ月',
-      '地区大会に出場するライバル校の演奏の噂が耳に入った。「負けたくない」という気持ちが部全体を引き締めた。第4週が本番だ、集中しよう。','var(--amber)');
-    addLog('ライバル校情報入手。モチベーション向上。','イベント');
-  } else {
-    applyAll(G,{morale:-2,skill:3});
-    showEventPopup('😰','地区大会直前の緊張',
-      '試験が終わり、いよいよ地区大会が近づいてきた。練習室の空気がぴりっと引き締まっている。緊張はあるが、音は確実に仕上がってきた。','var(--teal)');
-    addLog('地区大会直前期。緊張感の中で技術向上。','イベント');
-  }
+// コンクール直前の雰囲気
+const roll=Math.random();
+if(roll<0.50){
+  applyAll(G,{morale:4,skill:2});
+  showEventPopup('🔥','ライバル校の情報が入った',
+    '地区大会に出場するライバル校の演奏の噂が耳に入った。「負けたくない」という気持ちが部全体を引き締めた。','var(--amber)');
+  addLog('ライバル校情報入手。モチベーション向上。','イベント');
 } else {
-  // 非出場校：夏の練習モードへ切り替え
-  applyAll(G,{morale:3,stamina:2});
-  showEventPopup('☀️','夏の練習シーズンへ',
-    '期末試験が終わり、夏の練習モードに入った。コンクールには出ないが、定期演奏会や文化祭に向けて充実した練習を積んでいこう。','var(--gold)');
-  addLog('7月：夏の練習シーズン開始。','システム');
+  applyAll(G,{morale:-2,skill:3});
+  showEventPopup('😰','コンクール直前の緊張',
+    '試験が終わり、いよいよコンクールが近づいてきた。練習室の空気がぴりっと引き締まっている。緊張はあるが、音は確実に仕上がってきた。','var(--teal)');
+  addLog('コンクール直前期。緊張感の中で技術向上。','イベント');
 }
 }
 function monthEvent8(){
-// 8月：夏休み練習期間。合宿は第1週に自動実行。県大会は第2週。
+// 8月は夏休み期間：練習効果アップ・スタミナ消耗増のお知らせ
+// 合宿は第1週に自動実行（advanceWeek内で処理）
 const campMsg=G._campPlan&&!G._campPlan.skip
-  ?`合宿（${G._campPlan.theme.label}）は第1週に実施します。`
-  :G._campPlan?.skip?'今年の合宿は見送りです。':'合宿の計画がまだです。';
-const hasComp = !!(G.compSchedule||[]).find(s=>s.m===8&&s.qualified&&!s.done);
-if(hasComp){
-  showEventPopup('🎺','夏本番・県大会月へ',
-    `夏休みに入り練習効果がアップします。${campMsg}\n県大会は第2週です。合宿で仕上げて、そのまま本番へ臨もう！`,'var(--gold)');
-  addLog('8月：夏休み練習期間・県大会月。練習効果1.3倍。','システム');
-} else {
-  showEventPopup('☀️','夏休み練習期間スタート',
-    `夏休みに入り、練習時間がたっぷり取れます。練習効果が通常より高くなりますが、疲れも溜まりやすいです。\n${campMsg}`,'var(--gold)');
-  addLog('夏休み練習期間開始。練習効果1.3倍・スタミナ消耗増。','システム');
-}
+  ?`今週から合宿を実施します（${G._campPlan.theme.label}）。`
+  :G._campPlan?.skip?'今年の合宿は見送りです。':'合宿の計画がまだです。7月に計画を立ててください。';
+showEventPopup('☀️','夏休み練習期間スタート',
+  `夏休みに入り、練習時間がたっぷり取れます。\n練習効果が通常より高くなりますが、疲れも溜まりやすいです。\n${campMsg}`,'var(--gold)');
+addLog('夏休み練習期間開始。練習効果1.3倍・スタミナ消耗増。','システム');
 }
 function monthEvent9(){
-const hasComp = !!(G.compSchedule||[]).find(s=>s.m===9&&s.qualified&&!s.done);
-if(hasComp){
-  // 支部大会出場校：県大会を突破した高揚感と次の緊張
-  const roll=Math.random();
-  if(roll<0.45){
-    applyAll(G,{morale:6,skill:2,ens:2});
-    showEventPopup('🏆','支部大会へ進出！',
-      '県大会を勝ち抜き、支部大会への切符を手にした。部員たちの目には自信と興奮が宿っている。第4週の本番に向けて、さらに磨きをかけよう。','var(--gold)');
-    addLog('支部大会出場決定。士気・技術向上。','イベント');
-  } else {
-    applyAll(G,{morale:3,skill:3});
-    showEventPopup('😤','支部大会へ向けて気を引き締める',
-      '県大会を突破したが、支部大会のライバルはさらに強い。「まだ終わっていない」——その緊張感が練習の質を引き上げている。','var(--teal)');
-    addLog('支部大会直前。緊張感の中で技術向上。','イベント');
-  }
-  // 文化祭は規模を縮小して対応
-  const festPrac=G._festivalPrac||0;
-  if(festPrac>0){
-    applyAll(G,{morale:2,stamina:-2});
-    addLog('文化祭も並行して対応。コンクールと両立。','イベント');
-  }
-} else {
-  // ── 文化祭演奏（非出場校）──
-  const total=G.members.length;
-  const festPrac=G._festivalPrac||0;
-  const isSeparate=total>=80;
-  const isHard=total<55;
-  const quality=Math.min(100, festPrac*15+Math.round(G.skill*0.3)+Math.round(G.morale*0.2));
-  const isGood=quality>=50;
-  if(isSeparate){
-    applyAll(G,{morale:6,ens:3,stamina:-1});
-    showEventPopup('🎉','文化祭演奏（別メンバー対応）',
-      `80人超えの大所帯で文化祭メンバーを別途編成。余裕を持って${isGood?'好評の':''}演奏ができた。\n文化祭練習：${festPrac}週`,'var(--green)');
-  } else if(isHard){
-    applyAll(G,{morale:4,ens:2,stamina:-5});
-    ['kadaiParams','jiyuParams'].forEach(key=>{
-      if(!G[key]) return;
-      SONG_PARAMS.forEach(p=>{ G[key][p.key]=cap(G[key][p.key]-rnd(0,2)); });
+// ── 文化祭演奏 ──
+const total=G.members.length;
+const festPrac=G._festivalPrac||0;
+// 人数による分岐
+const isSeparate=total>=80;  // 大会と文化祭を別メンバーで対応できる
+const isHard=total<55;       // 大編成基準を下回る
+
+// 演奏の質：文化祭練習回数・士気・スキルで決まる
+const quality=Math.min(100,
+  festPrac*15 + Math.round(G.skill*0.3) + Math.round(G.morale*0.2)
+);
+const isGood=quality>=50;
+
+// 効果適用
+if(isSeparate){
+  // 余裕あり：大会メンバーへの影響なし
+  applyAll(G,{morale:6,ens:3,stamina:-1});
+  showEventPopup('🎉','文化祭演奏（別メンバー対応）',
+    `80人超えの大所帯で大会メンバーと文化祭メンバーを分けて対応。余裕を持って${isGood?'好評の':''}演奏ができた。\n文化祭練習：${festPrac}週`,
+    'var(--green)');
+} else if(isHard){
+  // 全員参加で消耗大・コンクール曲に影響
+  applyAll(G,{morale:4,ens:2,stamina:-5});
+  // コンクール曲パラメーターに少しダメージ
+  ['kadaiParams','jiyuParams'].forEach(key=>{
+    if(!G[key]) return;
+    SONG_PARAMS.forEach(p=>{
+      G[key][p.key]=cap(G[key][p.key]-rnd(0,2));
     });
-    showEventPopup('😓','文化祭演奏（全員掛け持ち・消耗）',
-      `部員数${total}人で文化祭も全員対応。スタミナを大きく消耗した。\n文化祭練習：${festPrac}週`,'var(--amber)');
-    addLog('文化祭：人数不足で消耗。','イベント');
-  } else {
-    applyAll(G,{morale:5,ens:2,stamina:-3});
-    showEventPopup('🎉',`文化祭演奏（${isGood?'好評':'やや苦戦'}）`,
-      `文化祭をこなした。疲れはあるが、${isGood?'お客さんの反応は上々だった。':'次回はもっと文化祭曲の練習を積みたい。'}\n文化祭練習：${festPrac}週`,
-      isGood?'var(--teal)':'var(--ink3)');
-  }
-  G._festivalQuality=quality;
-  addLog(`文化祭演奏終了（評価：${quality}点）`,'イベント');
+  });
+  showEventPopup('😓','文化祭演奏（全員掛け持ち・消耗）',
+    `部員数${total}人で文化祭も全員対応。スタミナを大きく消耗した。コンクール曲の仕上がりにも少し影響が出た。\n文化祭練習：${festPrac}週`,
+    'var(--amber)');
+  addLog('文化祭：人数不足で消耗。コンクール曲に影響。','イベント');
+} else {
+  // 55〜79人：掛け持ちで少し疲弊
+  applyAll(G,{morale:5,ens:2,stamina:-3});
+  showEventPopup('🎉',`文化祭演奏（掛け持ち・${isGood?'好評':'やや苦戦'}）`,
+    `大会メンバーと文化祭を同じメンバーでこなした。疲れはあるが、${isGood?'お客さんの反応は上々だった。':'次回に向けて文化祭曲の練習をもっと積みたい。'}\n文化祭練習：${festPrac}週`,
+    isGood?'var(--teal)':'var(--ink3)');
 }
-// アンコングループ編成
+
+// 翌年度入部者への影響を記録（quality値を保存）
+G._festivalQuality=quality;
+addLog(`文化祭演奏終了（出来映え評価：${quality}点）${isSeparate?'別メンバー対応':isHard?'全員掛け持ち':'掛け持ち'}`,'イベント');
+
+// アンコングループ編成も9月に
 const groupCount=G.division==='large'?rnd(3,6):rnd(2,4);
 G.members.filter(m=>Math.random()<0.3).forEach(m=>{
   m.skill=cap(m.skill+rnd(1,2));
@@ -3234,22 +3471,7 @@ G.members.filter(m=>Math.random()<0.3).forEach(m=>{
 addLog(`アンコン${groupCount}グループ編成。`,'イベント');
 }
 function monthEvent10(){
-const hasComp = !!(G.compSchedule||[]).find(s=>s.m===10&&s.qualified&&!s.done);
-if(hasComp){
-  const isNational=(G.compSchedule||[]).find(s=>s.m===10&&s.qualified&&!s.done)?.name==='全国大会';
-  if(isNational){
-    applyAll(G,{morale:8,skill:3,ens:2});
-    showEventPopup('🏆','全国大会への切符',
-      '支部大会を制し、ついに全国大会への出場が決まった。この舞台に立てるのは全国でもごく一部の学校だけ。第4週、すべての練習の集大成を見せよう。','var(--gold)');
-    addLog('全国大会出場決定。士気・技術向上。','イベント');
-  } else {
-    applyAll(G,{morale:6,skill:2,ens:2});
-    showEventPopup('🌸','東日本大会へ',
-      '支部大会を突破し、東日本大会への出場が決まった。ここまで来られたのはチーム全員の努力の証。第4週、悔いのない演奏を。','var(--teal)');
-    addLog('東日本大会出場決定。士気・技術向上。','イベント');
-  }
-}
-// 定期演奏会の準備と前売りチケット（全校共通）
+// 定期演奏会の準備と前売りチケット
 const preTicket=rnd(1,3)*10000;
 const preSuccess=Math.random()<(G.morale/100*0.7+0.3);
 if(preSuccess){
@@ -3264,25 +3486,21 @@ if(preSuccess){
     '年末の定期演奏会に向けて選曲・パート割り当てが始まった。集客が課題になりそうだ。','var(--blue)');
   addLog('定期演奏会準備開始。集客に課題あり。','イベント');
 }
-// クリスマスコンサートの企画がまだなら計画を立てる
-if(!G._xmasPlan){
-  setTimeout(()=>openXmasPlanModal(), 900);
-}
 }
 function monthEvent11(){
 // ── 定期演奏会の収支計算 ──
 // 支出：会場費 + 印刷費(プログラム) + 照明・音響費
-const venueCost   = G.diff==='easy' ? 40000  : G.diff==='mid' ? 70000  : 110000;
+const venueCost   = G.diff==='easy' ? 110000 : G.diff==='mid' ? 70000 : 40000;
 const printCost   = Math.round(G.members.length * 500);
-const stageCost   = G.diff==='easy' ? 15000  : G.diff==='mid' ? 25000  : 40000;
+const stageCost   = G.diff==='easy' ? 40000 : G.diff==='mid' ? 25000 : 15000;
 const totalCost   = venueCost + printCost + stageCost;
 // 収入：チケット収益（演奏力・士気・部員数で集客が変わる）
-const baseAudience = G.diff==='easy' ? 80 : G.diff==='mid' ? 150 : 250;
+const baseAudience = G.diff==='easy' ? 250 : G.diff==='mid' ? 150 : 80;
 const skillBonus   = Math.round((G.skill - 40) * 1.2);  // 演奏力が高いほど集客↑
 const moraleBonus  = Math.round((G.morale - 50) * 0.8); // 士気も影響
 const memberBonus  = Math.round(G.members.length * 0.5);// 部員の家族・友人
 const audience     = Math.max(20, baseAudience + skillBonus + moraleBonus + memberBonus + rnd(-20,30));
-const ticketPrice  = G.diff==='easy' ? 600 : G.diff==='mid' ? 800 : 1200;
+const ticketPrice  = G.diff==='easy' ? 1200 : G.diff==='mid' ? 800 : 600;
 const ticketIncome = audience * ticketPrice;
 const netBalance   = ticketIncome - totalCost;
 G.funds += netBalance;
@@ -3814,6 +4032,9 @@ function saveGame(slot){
     achievements:G.achievements, pracHistory:G.pracHistory,
     songBoredom:G.songBoredom, sectionalDebt:G.sectionalDebt,
     conflictActive:G.conflictActive, shirkerIds:G.shirkerIds,
+    _budget:G._budget||null,
+    _instruments:G._instruments||{small:100,large:100,percussion:100},
+    _loans:G._loans||[],
     log:(G.log||[]).slice(-50), // 直近50件のみ保存
   };
   localStorage.setItem(SAVE_KEY+'_'+slot, JSON.stringify(saveData));
@@ -3838,6 +4059,9 @@ function loadGame(slot){
     achievements:d.achievements||{}, pracHistory:d.pracHistory||[],
     songBoredom:d.songBoredom||0, sectionalDebt:d.sectionalDebt||0,
     conflictActive:d.conflictActive||false, shirkerIds:d.shirkerIds||[],
+    _budget:d._budget||null,
+    _instruments:d._instruments||{small:100,large:100,percussion:100},
+    _loans:d._loans||[],
     log:d.log||[],
   });
   closeModal('ov-save');
